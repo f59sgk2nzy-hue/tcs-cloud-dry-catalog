@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brand Directory — The Cushion Store · Cloud Dry</title>
+  <meta name="description" content="Top 20 outdoor furniture brands with cushions — The Cushion Store Cloud Dry OEM fitment directory. Milwaukee, WI. Fitment ID only.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">TCS</span>
+        <span class="brand-name">
+          <strong>The Cushion Store</strong>
+          <span>Cloud Dry</span>
+        </span>
+      </a>
+      <nav aria-label="Primary">
+        <ul class="nav-links">
+          <li><a href="index.html">Technical Story</a></li>
+          <li><a href="brands.html" aria-current="page">Brand Directory</a></li>
+          <li><a href="fit.html">OEM Fit Configurator</a></li>
+          <li><a href="sources.html">Sources</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="lookbook-bar brand-dir-bar">
+      <div class="wrap">
+        <span>The Cushion Store · Milwaukee</span>
+        <span>TCS Replacement Cushions · Brand Directory</span>
+      </div>
+    </div>
+    <section class="page-intro brand-dir-intro wrap">
+      <p class="eyebrow">OEM fitment directory</p>
+      <h1>Top 20 outdoor cushion brands</h1>
+      <p class="lede">Twelve brands are filterable in the OEM Fit Tool with brief-backed dims and COM. Eight expansion names are approved as fitment-ID directory cards only — no invented SKUs until dimensions and COM are briefed. Named furniture brands are trademarks of their owners.</p>
+      <p class="brand-dir-legend" id="legend">
+        <span class="chip chip-live">Live drop-ins</span>
+        <span class="chip chip-research">Approved — fitment ID</span>
+        <span class="chip chip-frozen">Classic dim conflicts frozen</span>
+      </p>
+      <p class="brand-dir-freeze-callout">
+        Classic deep-dive freeze (locked until re-brief): <code>TCS-C-31D</code>, <code>TCS-C-55W4</code>, <code>TCS-C-5DS010</code> —
+        visible in the catalog with drop-in claims withheld.
+        <a href="fit.html?brand=Classic">Open Classic in Fit Tool</a>
+      </p>
+    </section>
+
+    <div class="wrap brand-dir-toolbar">
+      <label class="field" for="statusFilter">Show
+        <select id="statusFilter">
+          <option value="">All 20</option>
+          <option value="live">Live drop-ins (12)</option>
+          <option value="research">Approved fitment ID (8)</option>
+        </select>
+      </label>
+      <p id="brandCount" aria-live="polite"></p>
+    </div>
+
+    <section class="wrap brand-dir-grid" id="brandGrid" aria-label="Brand directory cards"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <strong>The Cushion Store</strong> — Milwaukee, WI · Cloud Dry engineering for outdoor cushions that drain and recover.
+      <small>Dimensions and COM on live SKUs are customer-brief authoritative. Research brands have no published TCS sizes. Named furniture brands are trademarks of their respective owners; references are for fitment identification only.
+        <a href="fit.html">OEM Fit Configurator</a> · <a href="index.html">Technical Story</a> · <a href="sources.html">Sources</a></small>
+    </div>
+  </footer>
+
+  <script src="brand-directory-data.js"></script>
+  <script>
+  (function () {
+    const rows = window.TCS_BRAND_DIRECTORY || [];
+    const grid = document.getElementById('brandGrid');
+    const countEl = document.getElementById('brandCount');
+    const filterEl = document.getElementById('statusFilter');
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function card(b) {
+      const live = b.status === 'live';
+      const statusChip = live
+        ? '<span class="chip chip-live">' + b.skuCount + ' drop-ins</span>'
+        : '<span class="chip chip-research">Approved — fitment ID</span>';
+      const priority = b.expandPriority
+        ? '<span class="chip">' + escapeHtml(b.expandPriority) + '</span>'
+        : '';
+      const action = live && b.fitHref
+        ? '<a class="btn-outline brand-dir-cta" href="' + escapeHtml(b.fitHref) + '">Open in Fit Tool</a>'
+        : '<span class="brand-dir-cta muted">Approved fitment ID — awaiting dims / COM brief</span>';
+      return '<article class="brand-dir-card' + (live ? ' is-live' : ' is-research') + '">' +
+        '<div class="brand-dir-rank">#' + b.rank + '</div>' +
+        '<div class="chips">' + statusChip + priority + '</div>' +
+        '<h2>' + escapeHtml(b.name) + '</h2>' +
+        '<p>' + escapeHtml(b.blurb) + '</p>' +
+        action +
+        '</article>';
+    }
+
+    function apply() {
+      const status = filterEl.value;
+      const matches = rows.filter(b => !status || b.status === status);
+      countEl.innerHTML = '<strong>' + matches.length + '</strong> of ' + rows.length + ' brands';
+      grid.innerHTML = matches.map(card).join('');
+    }
+
+    filterEl.addEventListener('change', apply);
+    apply();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classic catalog cards — Fit Lab preview</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+body{background:#f5fafd;margin:0;padding:1.5rem;}
+.wrap{max-width:1100px;margin:0 auto;}
+.sku-grid-fit{display:grid;gap:0.85rem;}
+.sku-card-fit{background:#fff;border:1px solid #c5daf0;padding:1.15rem 1.2rem;}
+.sku-card-fit.is-frozen{border-color:#c4a35a;background:#fffbf2;}
+.sku-card-fit.is-near{border-color:#7aa8c9;background:#f5fafd;}
+.sku-card-fit .chips{display:flex;gap:0.35rem;flex-wrap:wrap;margin:0.35rem 0;}
+.sku-card-fit .chip{font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;border:1px solid #c5daf0;color:#667;padding:0.12rem 0.4rem;}
+.sku-card-fit .chip-frozen{border-color:#c4a35a;color:#8a6a1a;background:#fff3d6;}
+.sku-card-fit .chip-near{border-color:#7aa8c9;color:#2E7FC4;background:#e8f3fb;}
+.sku-card-fit .freeze-note{margin:0.55rem 0 0;font-size:0.82rem;color:#8a6a1a;line-height:1.35;}
+.sku-card-fit .near-note{color:#2E7FC4;}
+.sku-card-fit h3{margin:0.2rem 0;font-size:1.05rem;color:#1a4a7a;}
+.sku-meta-fit{display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;font-size:0.9rem;margin-top:0.65rem;}
+.sku-meta-fit span{display:block;font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;color:#667;margin-bottom:0.15rem;}
+h1{font-family:Georgia,serif;color:#1a4a7a;margin:0 0 0.35rem;}
+.lede{color:#445;max-width:40rem;}
+</style></head>
+<body>
+<div class="wrap">
+  <p class="eyebrow" style="letter-spacing:0.08em;text-transform:uppercase;color:#3B8FD4;font-size:0.75rem;">Fit Lab · Classic cards</p>
+  <h1>Master catalog — Classic (11)</h1>
+  <p class="lede">Hard freeze on three dim conflicts. Soft style-envelope on TCS-C-55W1 and TCS-P9-18. ILD* engineered targets pending ASTM D3574.</p>
+  <section class="sku-grid-fit" id="results"></section>
+</div>
+<script src="../../fit-data.js"></script>
+<script>
+const FROZEN={}; const rows=(window.TCS_SKUS||[]).filter(r=>r.brand==='Classic');
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function card(row){
+  const frozen=row.claimStatus==='frozen';
+  const near=row.claimStatus==='near-match';
+  let dimLabel='Exact dimensions';
+  if(frozen) dimLabel='Stored dimensions (frozen)';
+  else if(near) dimLabel='Style-envelope dimensions';
+  const chip=frozen?'<span class="chip chip-frozen">Dim conflict — frozen</span>':(near?'<span class="chip chip-near">Style envelope — not catalog-exact</span>':'');
+  const note=(frozen||near)?'<p class="freeze-note'+(near&&!frozen?' near-note':'')+'">'+esc(row.claimNote||'')+'</p>':'';
+  const cls=frozen?' is-frozen':(near?' is-near':'');
+  return '<article class="sku-card-fit'+cls+'"><div class="chips"><span class="chip">'+esc(row.brand)+'</span><span class="chip">'+esc(row.type)+'</span>'+chip+'</div>'+
+    '<div style="font-family:ui-monospace,monospace;font-size:0.85rem;color:#3B8FD4;">'+esc(row.modelSku)+'</div>'+
+    '<h3>'+esc(row.replaces)+'</h3>'+note+
+    '<div class="sku-meta-fit"><div><span>Configuration</span>'+esc(row.config)+'</div><div><span>'+dimLabel+'</span>'+esc(row.dimensions)+'</div>'+
+    '<div><span>Core / ILD*</span>'+esc(row.coreSpec)+'</div><div><span>COM 54"</span>'+esc(row.com)+'</div></div></article>';
+}
+document.getElementById('results').innerHTML=rows.map(card).join('');
+</script>
+</body></html>

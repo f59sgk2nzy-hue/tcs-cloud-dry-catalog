@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OEM Fit Configurator — The Cushion Store · Milwaukee</title>
+  <meta name="description" content="Interactive OEM Fit Configurator and Master Digital Catalog for The Cushion Store Cloud Dry cushions. Milwaukee, WI.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --navy: #3B8FD4;
+      --navy-mid: #2E7FC4;
+      --blue: #3B8FD4;
+      --blue-mid: #6BB0E8;
+      --blue-soft: #B8D9F5;
+      --linen: #f5fafd;
+      --linen-deep: #e8f3fb;
+      --paper: #ffffff;
+      --stone: #c5daf0;
+    }
+    .fit-lookbook {
+      --gold: #B8D9F5;
+    }
+    .photo-strip {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 0.4rem;
+      margin-top: 1.5rem;
+    }
+    .fit-lookbook + .photo-strip-wrap,
+    .fit-strip-band {
+      background: var(--navy);
+      padding: 0 0 1.5rem;
+    }
+    .fit-strip-band .wrap { padding-top: 0; }
+    .fit-strip-band .photo-strip { margin-top: 0; }
+    .photo-strip figure {
+      margin: 0;
+      border-radius: 0.55rem;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      background: var(--navy-mid);
+      border: 1px solid rgba(107,154,200,0.35);
+    }
+    .photo-strip img { width: 100%; height: 100%; object-fit: cover; }
+    @media (max-width: 1100px) {
+      .photo-strip { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .photo-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+    .step-illust {
+      margin: 0 0 1rem;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid var(--stone);
+      aspect-ratio: 16/9;
+      background: var(--linen-deep);
+    }
+    .step-illust img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .catalog-accents {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin: 0 0 1.25rem;
+    }
+    .catalog-accents figure {
+      margin: 0;
+      border-radius: 0.55rem;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      border: 1px solid var(--stone);
+      background: var(--linen-deep);
+    }
+    .catalog-accents img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    @media (max-width: 700px) {
+      .catalog-accents { grid-template-columns: repeat(2, 1fr); }
+    }
+    .tabbar {
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+      background: var(--linen-deep);
+      border-bottom: 1px solid var(--stone);
+      padding: 0.85rem 0;
+      position: sticky; top: 0; z-index: 20;
+    }
+    .tabbar .wrap { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .tab-btn {
+      appearance: none; border: 1px solid var(--stone); background: var(--paper);
+      color: var(--navy); font: inherit; font-weight: 600; padding: 0.55rem 1rem;
+      border-radius: 999px; cursor: pointer;
+    }
+    .tab-btn[aria-selected="true"] {
+      background: var(--navy); color: #fff; border-color: var(--navy);
+    }
+    .tab-btn:hover { border-color: var(--blue); }
+    .panel { display: none; padding: 1.75rem 0 3rem; }
+    .panel.active { display: block; }
+    .steps {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;
+      margin: 0 0 1.5rem;
+    }
+    .step-pill {
+      background: var(--paper); border: 1px solid var(--stone); border-radius: 0.75rem;
+      padding: 0.65rem 0.75rem; font-size: 0.9rem; color: var(--muted);
+    }
+    .step-pill strong { display: block; color: var(--navy); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .step-pill.active { border-color: var(--blue); background: var(--blue-soft); color: var(--navy-mid); }
+    .step-pill.done { border-color: var(--navy-mid); }
+    @media (max-width: 700px) { .steps { grid-template-columns: 1fr 1fr; } }
+    .builder-grid {
+      display: grid; grid-template-columns: 1.4fr 0.9fr; gap: 1.25rem; align-items: start;
+    }
+    @media (max-width: 900px) { .builder-grid { grid-template-columns: 1fr; } }
+    .card-panel {
+      background: var(--paper); border: 1px solid var(--stone); border-radius: 1rem;
+      padding: 1.15rem 1.2rem; box-shadow: 0 12px 28px rgba(11,37,69,0.05);
+    }
+    .choice-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.65rem; }
+    .choice {
+      border: 1px solid var(--stone); border-radius: 0.75rem; background: #fff;
+      padding: 0.8rem; text-align: left; cursor: pointer; font: inherit; color: inherit;
+    }
+    .choice:hover { border-color: var(--blue-mid); }
+    .choice.selected { border-color: var(--navy); background: var(--blue-soft); box-shadow: inset 0 0 0 1px var(--navy); }
+    .choice .meta { display: block; color: var(--muted); font-size: 0.82rem; margin-top: 0.25rem; }
+    .swatch {
+      width: 100%; height: 2.25rem; border-radius: 0.4rem; margin-bottom: 0.45rem;
+      border: 1px solid rgba(11,37,69,0.12);
+    }
+    .qty-row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: end; margin-top: 1rem; }
+    .qty-row label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; font-weight: 600; color: var(--navy); }
+    .qty-row input, .qty-row select {
+      font: inherit; padding: 0.5rem 0.65rem; border-radius: 0.5rem;
+      border: 1px solid var(--stone); min-width: 5rem; background: #fff;
+    }
+    .opt-row { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; margin-top: 1rem; }
+    .opt-row label { display: flex; gap: 0.4rem; align-items: center; font-size: 0.95rem; }
+    .summary dt { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-top: 0.65rem; }
+    .summary dd { margin: 0.15rem 0 0; color: var(--navy); font-weight: 600; }
+    .price-big { font-size: 1.85rem; color: var(--navy); margin: 0.35rem 0; }
+    .price-note { font-size: 0.85rem; color: var(--muted); }
+    .nav-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+    .btn-navy {
+      appearance: none; border: none; background: var(--navy); color: #fff;
+      font: inherit; font-weight: 600; padding: 0.65rem 1.1rem; border-radius: 999px; cursor: pointer;
+    }
+    .btn-navy:hover { background: var(--navy-mid); }
+    .btn-navy:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-outline {
+      appearance: none; border: 1px solid var(--navy-mid); background: transparent; color: var(--navy);
+      font: inherit; font-weight: 600; padding: 0.65rem 1.1rem; border-radius: 999px; cursor: pointer;
+    }
+    .piece-list { max-height: 22rem; overflow: auto; display: grid; gap: 0.5rem; }
+    .piece-list .choice { width: 100%; }
+    .catalog-toolbar { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 0.65rem; margin-bottom: 1rem; }
+    @media (max-width: 800px) { .catalog-toolbar { grid-template-columns: 1fr; } }
+    .sku-grid-fit {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.85rem;
+    }
+    .sku-card-fit {
+      background: var(--paper); border: 1px solid var(--stone); border-radius: 0.85rem; padding: 0.95rem;
+    }
+    .sku-card-fit .chips { display: flex; gap: 0.35rem; flex-wrap: wrap; margin: 0.35rem 0; }
+    .sku-card-fit .chip {
+      background: var(--blue-soft); color: var(--navy-mid); border-radius: 999px;
+      padding: 0.15rem 0.55rem; font-size: 0.75rem; font-weight: 600;
+    }
+    .sku-card-fit h3 { margin: 0.2rem 0; font-size: 1.05rem; color: var(--navy); }
+    .sku-card-fit.is-frozen { border-color: #c4a35a; background: #fffbf2; }
+    .sku-card-fit .chip-frozen { border-color: #c4a35a; color: #8a6a1a; background: #fff3d6; }
+    .sku-card-fit.is-near { border-color: #7aa8c9; background: #f5fafd; }
+    .sku-card-fit .chip-near { border-color: #7aa8c9; color: #2E7FC4; background: #e8f3fb; }
+    .sku-card-fit .near-note { color: #2E7FC4; }
+    .sku-card-fit .freeze-note { margin: 0.55rem 0 0; font-size: 0.82rem; color: #8a6a1a; line-height: 1.35; }
+    .choice.is-frozen { opacity: 0.72; border-style: dashed; cursor: not-allowed; }
+    .choice.is-frozen .meta-freeze { color: #8a6a1a; }
+
+    .sku-meta-fit { display: grid; gap: 0.35rem; font-size: 0.9rem; margin-top: 0.55rem; }
+    .sku-meta-fit span { color: var(--muted); display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .empty-state { padding: 2rem; text-align: center; color: var(--muted); background: var(--linen-deep); border-radius: 0.85rem; }
+    .warm-note {
+      background: var(--blue-soft); border: 1px solid #9ec4e8; border-radius: 0.85rem;
+      padding: 0.85rem 1rem; margin: 1rem 0 0; color: var(--navy-mid); font-size: 0.95rem;
+    }
+
+    /* OEM search-first entry on Interactive Fit Tool */
+    .oem-search-panel {
+      background: var(--paper); border: 1px solid var(--stone); border-radius: 1rem;
+      padding: 1rem 1.15rem; margin: 0 0 1.25rem;
+      box-shadow: 0 12px 28px rgba(11,37,69,0.05);
+    }
+    .oem-search-panel h2 { margin: 0 0 0.35rem; color: var(--navy); font-size: 1.15rem; }
+    .oem-search-panel .hint { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.92rem; }
+    .oem-search-row { display: grid; grid-template-columns: 1fr auto; gap: 0.65rem; align-items: end; }
+    @media (max-width: 640px) { .oem-search-row { grid-template-columns: 1fr; } }
+    .oem-search-row label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; font-weight: 600; color: var(--navy); }
+    .oem-search-row input[type="search"] {
+      font: inherit; padding: 0.65rem 0.85rem; border-radius: 0.55rem;
+      border: 2px solid var(--navy); background: #fff; width: 100%;
+    }
+    .oem-search-row input[type="search"]:focus { outline: 2px solid var(--blue-mid); outline-offset: 1px; }
+    .oem-results {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 0.65rem; margin-top: 0.85rem; max-height: 22rem; overflow: auto;
+    }
+    .oem-hit {
+      text-align: left; font: inherit; color: inherit; cursor: pointer;
+      border: 1px solid var(--stone); border-radius: 0.75rem; background: #fff;
+      padding: 0.75rem 0.85rem;
+    }
+    .oem-hit:hover { border-color: var(--blue-mid); background: var(--linen); }
+    .oem-hit .sku { font-family: var(--mono, ui-monospace, monospace); font-size: 0.85rem; color: var(--blue); font-weight: 700; }
+    .oem-hit .replaces { display: block; color: var(--navy); font-weight: 600; margin: 0.2rem 0; font-size: 0.95rem; }
+    .oem-hit .meta-line { display: block; color: var(--muted); font-size: 0.8rem; margin-top: 0.15rem; }
+    .oem-hit.is-frozen { opacity: 0.78; border-style: dashed; border-color: #c4a35a; background: #fffbf2; cursor: not-allowed; }
+    .oem-hit.is-near { border-color: #7aa8c9; background: #f5fafd; }
+    .oem-hit .flag { display: inline-block; margin-top: 0.35rem; font-size: 0.72rem; font-weight: 700;
+      padding: 0.12rem 0.45rem; border-radius: 999px; }
+    .oem-hit .flag-frozen { background: #fff3d6; color: #8a6a1a; }
+    .oem-hit .flag-near { background: #e8f3fb; color: #2E7FC4; }
+    .oem-empty { margin: 0.75rem 0 0; color: var(--muted); font-size: 0.92rem; }
+    .oem-or { text-align: center; color: var(--muted); font-size: 0.85rem; margin: 0.35rem 0 1rem;
+      letter-spacing: 0.06em; text-transform: uppercase; }
+
+    /* Custom Maker */
+    .custom-grid {
+      display: grid; grid-template-columns: 1fr 1.15fr; gap: 1.25rem; align-items: start;
+    }
+    @media (max-width: 900px) { .custom-grid { grid-template-columns: 1fr; } }
+    .custom-form label.field {
+      display: flex; flex-direction: column; gap: 0.3rem;
+      font-size: 0.9rem; font-weight: 600; color: var(--navy); margin-bottom: 0.75rem;
+    }
+    .custom-form input, .custom-form select, .custom-form textarea {
+      font: inherit; padding: 0.5rem 0.65rem; border-radius: 0.5rem;
+      border: 1px solid var(--stone); background: #fff; width: 100%; box-sizing: border-box;
+    }
+    .custom-form textarea { min-height: 3.2rem; resize: vertical; }
+    .dim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; }
+    @media (max-width: 560px) { .dim-grid { grid-template-columns: 1fr; } }
+    .custom-form .opt-row { margin: 0.25rem 0 0.85rem; }
+    .custom-disclaimer {
+      background: #fffbf2; border: 1px solid #c4a35a; border-radius: 0.75rem;
+      padding: 0.75rem 0.9rem; font-size: 0.88rem; color: #8a6a1a; margin: 0.75rem 0 0;
+    }
+    .drawing-wrap {
+      background: var(--linen-deep); border: 1px solid var(--stone); border-radius: 0.85rem;
+      padding: 0.75rem; overflow: auto;
+    }
+    .drawing-wrap svg { display: block; width: 100%; height: auto; background: #fff; border-radius: 0.5rem; }
+    .custom-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.85rem; }
+    #twoPcFields[hidden] { display: none !important; }
+    @media print {
+      body.print-custom-drawing .site-nav,
+      body.print-custom-drawing .fit-lookbook,
+      body.print-custom-drawing .fit-strip-band,
+      body.print-custom-drawing .tabbar,
+      body.print-custom-drawing .site-footer,
+      body.print-custom-drawing .page-intro,
+      body.print-custom-drawing .custom-form,
+      body.print-custom-drawing .custom-actions,
+      body.print-custom-drawing .price-note { display: none !important; }
+      body.print-custom-drawing #customDrawingWrap {
+        border: none; background: #fff; padding: 0; box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">TCS</span>
+        <span class="brand-name">
+          <strong>The Cushion Store</strong>
+          <span>Cloud Dry · Milwaukee, WI</span>
+        </span>
+      </a>
+      <nav aria-label="Primary">
+        <ul class="nav-links">
+          <li><a href="index.html">Technical Story</a></li>
+          <li><a href="brands.html">Brand Directory</a></li>
+          <li><a href="fit.html" aria-current="page">OEM Fit Configurator</a></li>
+          <li><a href="sources.html">Sources</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="fit-lookbook" style="background-image: url('assets/prestige/09-courtyard-dappled.png');" aria-label="OEM Fit Configurator">
+    <div class="wrap">
+      <hr class="gold-rule short" aria-hidden="true">
+      <p class="eyebrow">The Cushion Store · Milwaukee, WI · Cloud Dry</p>
+      <h1>OEM Fit Configurator</h1>
+      <p class="lede">Search an OEM code to see our Cloud Dry drop-in options, walk the brand → piece → fabric builder, or draft a custom quote drawing from frame type and dimensions. Ninety-four catalog drop-ins — engineered to drain, recover, and look guest-ready after a Wisconsin season of sun and overnight rain.</p>
+    </div>
+  </section>
+  <div class="fit-strip-band">
+    <div class="wrap">
+      <div class="photo-strip" aria-label="Prestige product photography">
+        <figure><img src="assets/prestige/10-lakeside-lounge.png" alt="Lakeside lounge cushions" loading="lazy"></figure>
+        <figure><img src="assets/prestige/11-screened-porch.png" alt="Screened porch deep seating" loading="lazy"></figure>
+        <figure><img src="assets/prestige/12-rooftop-bluehour.png" alt="Rooftop blue-hour lounge" loading="lazy"></figure>
+        <figure><img src="assets/prestige/13-ottoman.png" alt="Cloud Dry ottoman" loading="lazy"></figure>
+        <figure><img src="assets/prestige/14-lumbar.png" alt="Lumbar pillow pair" loading="lazy"></figure>
+        <figure><img src="assets/prestige/16-sectional-corner.png" alt="Sectional corner cushion" loading="lazy"></figure>
+        <figure><img src="assets/prestige/17-boxed-seat-hero.png" alt="Boxed seat hero" loading="lazy"></figure>
+        <figure><img src="assets/prestige/19-deep-seat-stack.png" alt="Deep-seat cushion stack" loading="lazy"></figure>
+        <figure><img src="assets/prestige/20-chaise-pad.png" alt="Chaise pad" loading="lazy"></figure>
+        <figure><img src="assets/prestige/22-foam-cutaway.png" alt="Boxed Cloud Dry seat cushion" loading="lazy"></figure>
+        <figure><img src="assets/prestige/24-cnc-core.png" alt="Deep-seat cushion stack" loading="lazy"></figure>
+        <figure><img src="assets/prestige/26-shade-chaise.png" alt="Shade chaise cushions" loading="lazy"></figure>
+        <figure><img src="assets/prestige/27-intimate-dining.png" alt="Intimate dining cushions" loading="lazy"></figure>
+        <figure><img src="assets/prestige/30-lakefront-morning.png" alt="Lakefront morning seating" loading="lazy"></figure>
+        <figure><img src="assets/prestige/31-pillow-pair.png" alt="Pillow pair" loading="lazy"></figure>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="wrap" role="tablist" aria-label="Fit Tool views">
+      <button class="tab-btn" role="tab" id="tab-builder" aria-selected="true" aria-controls="panel-builder">Interactive Fit Tool</button>
+      <button class="tab-btn" role="tab" id="tab-catalog" aria-selected="false" aria-controls="panel-catalog">Master Digital Catalog</button>
+      <button class="tab-btn" role="tab" id="tab-custom" aria-selected="false" aria-controls="panel-custom">Custom Maker</button>
+    </div>
+  </div>
+
+  <main id="main">
+    <section class="panel active" id="panel-builder" role="tabpanel" aria-labelledby="tab-builder">
+      <div class="wrap">
+        <div class="oem-search-panel" id="oemSearchPanel">
+          <h2>Search OEM code or model</h2>
+          <p class="hint">Clearest path: type an OEM code, model, brand, or replaces text — matching Cloud Dry drop-ins appear immediately. Click a card to jump to fabric (frozen rows stay visible but not selectable).</p>
+          <div class="oem-search-row">
+            <label for="oemQ">Search OEM
+              <input type="search" id="oemQ" name="oemQ" placeholder="e.g. 6001, Hatteras, Berlin Gardens, deep seat…" autocomplete="off" aria-controls="oemResults">
+            </label>
+            <button type="button" class="btn-outline" id="oemJumpCatalog">Open full catalog</button>
+          </div>
+          <div id="oemResults" class="oem-results" aria-live="polite" hidden></div>
+          <p id="oemEmpty" class="oem-empty" hidden>No drop-ins match. Try another OEM code, or use Custom Maker for a user-entered quote drawing.</p>
+          <p class="oem-ild-note" style="margin:0.65rem 0 0;font-size:0.8rem;color:var(--muted);">* ILD bands are engineered targets pending ASTM D3574 lab confirmation. Named brands = fitment ID only.</p>
+        </div>
+        <p class="oem-or">— or choose brand first —</p>
+        <div class="steps" id="stepPills" aria-label="Builder steps">
+          <div class="step-pill active" data-step="1"><strong>Step 1</strong> Choose brand</div>
+          <div class="step-pill" data-step="2"><strong>Step 2</strong> Choose piece</div>
+          <div class="step-pill" data-step="3"><strong>Step 3</strong> Choose fabric</div>
+          <div class="step-pill" data-step="4"><strong>Step 4</strong> Review &amp; price</div>
+        </div>
+
+        <div class="builder-grid">
+          <div class="card-panel">
+            <div id="step1">
+              <figure class="step-illust">
+                <img src="assets/prestige/32-dusk-hospitality.png" alt="Hospitality dusk seating for brand fit programs" loading="lazy">
+              </figure>
+              <h2 style="margin-top:0;color:var(--navy);">Which furniture brand are we matching?</h2>
+              <p style="color:var(--muted);margin-top:0;">Pick the OEM family. Named brands are trademarks of their owners — we use them only for fitment.</p>
+              <div class="choice-grid" id="brandChoices"></div>
+            </div>
+            <div id="step2" hidden>
+              <figure class="step-illust">
+                <img src="assets/prestige/15-dining-pad.png" alt="Dining pad piece selection" loading="lazy">
+              </figure>
+              <h2 style="margin-top:0;color:var(--navy);">Which cushion piece?</h2>
+              <p style="color:var(--muted);margin-top:0;">Filter by type, then select the exact OEM drop-in from our master.</p>
+              <div class="choice-grid" id="typeChoices" style="margin-bottom:1rem;"></div>
+              <div class="piece-list" id="pieceChoices"></div>
+            </div>
+            <div id="step3" hidden>
+              <figure class="step-illust">
+                <img src="assets/prestige/23-fabric-bolt.png" alt="Outdoor fabric bolt for finish selection" loading="lazy">
+              </figure>
+              <h2 style="margin-top:0;color:var(--navy);">Fabric &amp; finish</h2>
+              <p style="color:var(--muted);margin-top:0;">Performance acrylics, prestige weaves, or your own outdoor-rated COM. Cloud Dry cores stay consistent underneath.</p>
+              <div class="choice-grid" id="fabricChoices"></div>
+              <div class="opt-row">
+                <label><input type="checkbox" id="optWelt" checked> Contrast / self welt (+$28)</label>
+                <label><input type="checkbox" id="optTies"> Seat ties (+$18)</label>
+                <label><input type="checkbox" id="optBoxing" checked> Full boxing (+$42)</label>
+              </div>
+              <div class="qty-row">
+                <label>Quantity
+                  <input type="number" id="qty" min="1" max="99" value="2">
+                </label>
+              </div>
+            </div>
+            <div id="step4" hidden>
+              <figure class="step-illust">
+                <img src="assets/prestige/25-guest-ready.png" alt="Guest-ready Cloud Dry configuration" loading="lazy">
+              </figure>
+              <h2 style="margin-top:0;color:var(--navy);">Your Cloud Dry configuration</h2>
+              <p style="color:var(--muted);margin-top:0;">Warm estimate for planning — final quote confirms COM, pattern match, and freight from Milwaukee.</p>
+              <div id="reviewCopy"></div>
+              <div class="warm-note">Every core is Cloud Dry reticulated (or the HR / composite stack noted on the SKU) — cut for drainage and recovery, not densified batting.</div>
+            </div>
+            <div class="nav-actions">
+              <button type="button" class="btn-outline" id="btnBack" hidden>Back</button>
+              <button type="button" class="btn-navy" id="btnNext">Continue</button>
+            </div>
+          </div>
+
+          <aside class="card-panel summary" aria-live="polite">
+            <p class="eyebrow" style="margin:0;">Live estimate</p>
+            <h2 style="margin:0.2rem 0 0.5rem;color:var(--navy);font-size:1.25rem;">Configuration</h2>
+            <dl id="summaryDl">
+              <dt>Brand</dt><dd id="sumBrand">—</dd>
+              <dt>Piece</dt><dd id="sumPiece">—</dd>
+              <dt>Fabric</dt><dd id="sumFabric">—</dd>
+              <dt>Qty</dt><dd id="sumQty">2</dd>
+            </dl>
+            <p class="price-big" id="sumPrice">$—</p>
+            <p class="price-note" id="sumBreakdown">Select a brand to begin.</p>
+            <p class="price-note">Estimates include Cloud Dry core, cut, sew, and selected finish options. Tax &amp; freight quoted separately.</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-catalog" role="tabpanel" aria-labelledby="tab-catalog" hidden>
+      <div class="wrap">
+        <header class="page-intro" style="padding-top:0;">
+          <p class="eyebrow">94 OEM drop-ins</p>
+          <h1 style="margin-top:0;">Master Digital Catalog</h1>
+          <p class="lede">Search Model, OEM line, or brand. Filter dining, deep seat, chaise, ottoman, pillow, bench, and specialty. Dimensions and COM are customer-brief authoritative.</p>
+        </header>
+        <div class="catalog-accents" aria-label="Finish and construction details">
+          <figure><img src="assets/prestige/18-welt-detail.png" alt="Self-welt detail" loading="lazy"></figure>
+          <figure><img src="assets/prestige/21-boxing-corner.png" alt="Boxing corner detail" loading="lazy"></figure>
+          <figure><img src="assets/prestige/28-ties-stitch.png" alt="Seat ties stitch detail" loading="lazy"></figure>
+          <figure><img src="assets/prestige/29-contrast-welt.png" alt="Contrast welt detail" loading="lazy"></figure>
+        </div>
+        <form class="catalog-toolbar" id="catalogFilters" role="search">
+          <label class="field" for="q">Search
+            <input type="search" id="q" name="q" placeholder="OEM code, model, or name" autocomplete="off">
+          </label>
+          <label class="field" for="brand">Brand
+            <select id="brand" name="brand"><option value="">All brands</option></select>
+          </label>
+          <label class="field" for="type">Type
+            <select id="type" name="type"><option value="">All types</option></select>
+          </label>
+          <button class="btn-outline" type="reset" id="resetCatalog">Clear</button>
+        </form>
+        <p id="count" aria-live="polite" style="color:var(--muted);"></p>
+        <p class="ild-footnote" style="color:var(--muted);font-size:0.85rem;">* ILD bands are engineered targets pending ASTM D3574 laboratory confirmation. Soft style-envelope flags on TCS-C-55W1 and TCS-P9-18 per Spec claim-check.</p>
+        <section class="sku-grid-fit" id="results" aria-label="Matching SKUs"></section>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-custom" role="tabpanel" aria-labelledby="tab-custom" hidden>
+      <div class="wrap">
+        <header class="page-intro" style="padding-top:0;">
+          <p class="eyebrow">Custom quote drawing</p>
+          <h1 style="margin-top:0;">Custom Cushion Maker</h1>
+          <p class="lede">Enter frame type and cushion dimensions to generate a dimensioned plan drawing. This is a <strong>custom quote</strong> — not an OEM drop-in SKU. Named brands, if noted, are fitment ID only.</p>
+        </header>
+        <div class="custom-grid">
+          <div class="card-panel custom-form" id="customForm">
+            <h2 style="margin-top:0;color:var(--navy);font-size:1.15rem;">Frame &amp; dimensions</h2>
+            <label class="field" for="cmFrame">Frame / piece type
+              <select id="cmFrame">
+                <option value="dining">Dining</option>
+                <option value="deep seat">Deep seat</option>
+                <option value="deep seat 2pc">Deep seat (2pc: seat + back)</option>
+                <option value="chaise">Chaise</option>
+                <option value="ottoman">Ottoman</option>
+                <option value="bench">Bench</option>
+                <option value="pillow">Pillow</option>
+                <option value="specialty">Specialty</option>
+              </select>
+            </label>
+            <div id="onePcFields">
+              <p style="margin:0 0 0.4rem;font-size:0.85rem;color:var(--muted);font-weight:600;">Overall dimensions (inches) — user-entered</p>
+              <div class="dim-grid">
+                <label class="field" for="cmW">Width
+                  <input type="number" id="cmW" min="1" max="120" step="0.25" value="24">
+                </label>
+                <label class="field" for="cmD">Depth / length
+                  <input type="number" id="cmD" min="1" max="120" step="0.25" value="24">
+                </label>
+                <label class="field" for="cmT">Thickness
+                  <input type="number" id="cmT" min="0.5" max="12" step="0.25" value="4">
+                </label>
+              </div>
+            </div>
+            <div id="twoPcFields" hidden>
+              <p style="margin:0 0 0.4rem;font-size:0.85rem;color:var(--muted);font-weight:600;">Seat (inches) — user-entered</p>
+              <div class="dim-grid">
+                <label class="field" for="cmSeatW">Seat W
+                  <input type="number" id="cmSeatW" min="1" max="120" step="0.25" value="24">
+                </label>
+                <label class="field" for="cmSeatD">Seat D
+                  <input type="number" id="cmSeatD" min="1" max="120" step="0.25" value="26">
+                </label>
+                <label class="field" for="cmSeatT">Seat T
+                  <input type="number" id="cmSeatT" min="0.5" max="12" step="0.25" value="5">
+                </label>
+              </div>
+              <p style="margin:0.6rem 0 0.4rem;font-size:0.85rem;color:var(--muted);font-weight:600;">Back (inches) — user-entered</p>
+              <div class="dim-grid">
+                <label class="field" for="cmBackW">Back W
+                  <input type="number" id="cmBackW" min="1" max="120" step="0.25" value="24">
+                </label>
+                <label class="field" for="cmBackD">Back D / H
+                  <input type="number" id="cmBackD" min="1" max="120" step="0.25" value="22">
+                </label>
+                <label class="field" for="cmBackT">Back T
+                  <input type="number" id="cmBackT" min="0.5" max="12" step="0.25" value="5">
+                </label>
+              </div>
+            </div>
+            <label class="field" for="cmBrandNote">Brand fitment note <span style="font-weight:500;color:var(--muted);">(optional · fitment ID only)</span>
+              <input type="text" id="cmBrandNote" placeholder="e.g. fitment reference only — not affiliation" maxlength="120" autocomplete="off">
+            </label>
+            <p style="margin:0 0 0.35rem;font-size:0.85rem;color:var(--muted);font-weight:600;">Finish cues (visual on drawing only)</p>
+            <div class="opt-row">
+              <label><input type="checkbox" id="cmTies"> Ties</label>
+              <label><input type="checkbox" id="cmWelt" checked> Welt</label>
+              <label><input type="checkbox" id="cmBoxing" checked> Boxing</label>
+            </div>
+            <div class="custom-disclaimer">
+              Custom quote — not an OEM drop-in SKU. Dimensions are user-entered (not from the catalog). Drawing scale is approximate for quote conversation only. Trademarks (if any) are fitment identification only. No catalog SKU is assigned by this tool.
+            </div>
+          </div>
+          <div class="card-panel">
+            <h2 style="margin-top:0;color:var(--navy);font-size:1.15rem;">Plan drawing</h2>
+            <p style="color:var(--muted);margin-top:0;font-size:0.9rem;">Live SVG top view (plan) · thickness called out in text · Cloud Dry / The Cushion Store title block</p>
+            <div class="drawing-wrap" id="customDrawingWrap">
+              <div id="customSvgHost"></div>
+            </div>
+            <div class="custom-actions">
+              <button type="button" class="btn-navy" id="cmDownloadSvg">Download SVG</button>
+              <button type="button" class="btn-outline" id="cmPrint">Print</button>
+            </div>
+            <p class="price-note" style="margin-top:0.85rem;">Pricing omitted — request a custom quote from Milwaukee. Do not treat this drawing as a catalog drop-in.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <strong>The Cushion Store</strong> — Milwaukee, WI · Cloud Dry engineering for outdoor cushions that drain and recover.
+      <small>ILD and ASTM values are engineered targets pending laboratory confirmation. Named furniture brands are trademarks of their respective owners; references are for fitment identification only. <a href="sources.html">Performance basis</a> · <a href="index.html">Technical Story</a></small>
+    </div>
+  </footer>
+
+  <script src="fit-data.js"></script>
+  <script>
+  /* Custom OEM Cushion Builder — masterData + pricing engine */
+  const masterData = {
+  "brand": {
+    "name": "The Cushion Store",
+    "mark": "TCS",
+    "city": "Milwaukee, WI",
+    "product": "Cloud Dry"
+  },
+  "brands": [
+    "Berlin Gardens",
+    "Classic",
+    "Ebel",
+    "Erwin & Sons",
+    "Gensun",
+    "Hanamint",
+    "Jensen Leisure",
+    "Lloyd Flanders",
+    "North Cape",
+    "Patio Renaissance",
+    "Polywood",
+    "Seaside Casual"
+  ],
+  "pieceTypes": [
+    {
+      "id": "dining",
+      "name": "Dining seat",
+      "blurb": "Boxed dining pads with Cloud Dry cores for rain-ready terraces.",
+      "base": 185
+    },
+    {
+      "id": "deep seat",
+      "name": "Deep seat",
+      "blurb": "Lounge and sectional seats with recovering Cloud Dry comfort.",
+      "base": 320
+    },
+    {
+      "id": "chaise",
+      "name": "Chaise",
+      "blurb": "Long-form chaise pads that drain overnight and keep their silhouette.",
+      "base": 410
+    },
+    {
+      "id": "ottoman",
+      "name": "Ottoman",
+      "blurb": "Matching ottoman tops for deep-seat and sectional programs.",
+      "base": 210
+    },
+    {
+      "id": "pillow",
+      "name": "Pillow",
+      "blurb": "Knife-edge and lightly boxed decorative pillows.",
+      "base": 95
+    },
+    {
+      "id": "bench",
+      "name": "Bench",
+      "blurb": "Bench and banquette pads cut to OEM footprints.",
+      "base": 275
+    },
+    {
+      "id": "specialty",
+      "name": "Specialty",
+      "blurb": "Curved, wedge, and one-off OEM geometries.",
+      "base": 360
+    }
+  ],
+  "fabrics": [
+    {
+      "id": "sunbrella-canvas",
+      "name": "Sunbrella Canvas",
+      "tier": "Performance",
+      "perYd": 62,
+      "swatch": "#c9b8a0",
+      "note": "Solution-dyed acrylic \u00b7 soft hand"
+    },
+    {
+      "id": "sunbrella-texture",
+      "name": "Sunbrella Texture",
+      "tier": "Performance",
+      "perYd": 74,
+      "swatch": "#6B9AC8",
+      "note": "Woven texture \u00b7 coastal blues & linens"
+    },
+    {
+      "id": "outdura-solid",
+      "name": "Outdura Solid",
+      "tier": "Performance",
+      "perYd": 58,
+      "swatch": "#12365c",
+      "note": "Heavy outdoor acrylic \u00b7 deep navy"
+    },
+    {
+      "id": "agora-plain",
+      "name": "Agora Plain",
+      "tier": "Value",
+      "perYd": 48,
+      "swatch": "#efeae2",
+      "note": "Clean solids for hospitality volume"
+    },
+    {
+      "id": "com",
+      "name": "COM \u2014 Customer\u2019s Own Material",
+      "tier": "COM",
+      "perYd": 0,
+      "swatch": "#d9d2c8",
+      "note": "Outdoor-rated COM \u00b7 yield priced at sew only"
+    },
+    {
+      "id": "luxury-weave",
+      "name": "Coastal Luxury Weave",
+      "tier": "Prestige",
+      "perYd": 96,
+      "swatch": "#4A7FB5",
+      "note": "Soft prestige weave \u00b7 guest-facing programs"
+    }
+  ],
+  "pricing": {
+    "laborPerPiece": 95,
+    "weltAdd": 28,
+    "tiesAdd": 18,
+    "boxingAdd": 42,
+    "cloudDryCorePerBoardFt": 14.5,
+    "comSewOnlyPerYd": 22,
+    "qtyBreaks": [
+      {
+        "min": 1,
+        "mult": 1
+      },
+      {
+        "min": 4,
+        "mult": 0.94
+      },
+      {
+        "min": 8,
+        "mult": 0.88
+      },
+      {
+        "min": 16,
+        "mult": 0.82
+      }
+    ]
+  },
+  "pieces": [
+    {
+      "id": "TCS-P9-18",
+      "sku": "TCS-P9-18",
+            "claimStatus": "near-match",
+      "claimNote": "Specialty approximate family; Classic catalog core P9 is 20x20. TCS 18x18 is Specialty approx — not catalog-exact.",
+"brand": "Classic",
+      "type": "pillow",
+      "name": "Classic P9 \u2014 18\" decorative pillow family (pattern options listed below)",
+      "config": "Knife-edge / lightly boxed decorative pillow insert",
+      "dimensions": "18\" \u00d7 18\"",
+      "coreSpec": "Soft HR / soft cellular core \u00b7 ILD 12\u201318",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-P9-20",
+      "sku": "TCS-P9-20",
+      "brand": "Classic",
+      "type": "pillow",
+      "name": "Classic P9 \u2014 20\" decorative pillow family (pattern options listed below)",
+      "config": "Knife-edge / lightly boxed decorative pillow insert",
+      "dimensions": "20\" \u00d7 20\"",
+      "coreSpec": "Soft HR / soft cellular core \u00b7 ILD 12\u201318",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-P55-LUM",
+      "sku": "TCS-P55-LUM",
+      "brand": "Classic",
+      "type": "pillow",
+      "name": "Classic P55 Lumbar (pattern options listed below)",
+      "config": "Lumbar pillow insert",
+      "dimensions": "19\" \u00d7 11\"",
+      "coreSpec": "Soft HR / soft cellular core \u00b7 ILD 12\u201318",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-C-H200",
+      "sku": "TCS-C-H200",
+      "brand": "Classic",
+      "type": "dining",
+      "name": "C-H200 Hatteras Dining (Matching Fabric Ties)",
+      "config": "1pc dining seat/back profile with matching fabric ties",
+      "dimensions": "21\" \u00d7 38\" (19\" Seat / 19\" Back \u00d7 3\")",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-C-4AP2",
+      "sku": "TCS-C-4AP2",
+      "brand": "Classic",
+      "type": "chaise",
+      "name": "C-4AP2 Add-A-Pad Multi-Purpose Chaise Pad with Hood",
+      "config": "1pc thin chaise pad with hood",
+      "dimensions": "22\" \u00d7 74\" \u00d7 1.5\"",
+      "coreSpec": "HR polyurethane \u00b7 ILD 30\u201340",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-C-4AP7",
+      "sku": "TCS-C-4AP7",
+      "brand": "Classic",
+      "type": "ottoman",
+      "name": "C-4AP7 Add-A-Pad Multi-Purpose Ottoman Pad",
+      "config": "1pc thin ottoman pad",
+      "dimensions": "22\" \u00d7 22\" \u00d7 1.5\"",
+      "coreSpec": "HR polyurethane \u00b7 ILD 30\u201340",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-C-31D",
+      "sku": "TCS-C-31D",
+            "claimStatus": "frozen",
+      "claimNote": "Catalog C-31D prints 19x17x2.5 in; TCS stores 19x19x2 in. Drop-in claims frozen — locked until re-brief.",
+      "brand": "Classic",
+      "type": "dining",
+      "name": "C-31D Universal Wrought Iron Seat",
+      "config": "1pc seat pad",
+      "dimensions": "19\" \u00d7 19\" \u00d7 2\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-C-55W1",
+      "sku": "TCS-C-55W1",
+      "claimStatus": "near-match",
+      "claimNote": "Classic catalog prints C-55 W1 at 43.5x18x3 in; TCS stores 44x18x3 in. Style-envelope near-match — not catalog-exact.",
+      "brand": "Classic",
+      "type": "bench",
+      "name": "C-55 W1 Universal Wood 4' Bench (Self-Welted, Boxed)",
+      "config": "1pc bench cushion, boxed & self-welted",
+      "dimensions": "44\" \u00d7 18\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 2.0,
+      "comLabel": "2.0 yds"
+    },
+    {
+      "id": "TCS-C-55W4",
+      "sku": "TCS-C-55W4",
+            "claimStatus": "frozen",
+      "claimNote": "Catalog C-55 W4 prints 20x49 (16/33)x2.5 in; TCS stores 20.5x49 (18/31). Drop-in claims frozen — locked until re-brief.",
+      "brand": "Classic",
+      "type": "specialty",
+      "name": "C-55 W4 Universal Wood Adirondack",
+      "config": "1pc seat/back Adirondack profile",
+      "dimensions": "20.5\" \u00d7 49\" \u00d7 2.5\" (18\" Seat / 31\" Back)",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 2.5,
+      "comLabel": "2.5 yds"
+    },
+    {
+      "id": "TCS-C-5DS01",
+      "sku": "TCS-C-5DS01",
+      "brand": "Classic",
+      "type": "deep seat",
+      "name": "C-5DS01 Universal Deep Seating Curved Back & Seat (2pc)",
+      "config": "2pc: curved back + seat",
+      "dimensions": "Back 21\" \u00d7 21\" \u00d7 3\"; Seat 21\" \u00d7 23\" \u00d7 4\"",
+      "coreSpec": "Composite Sandwich (HR + Cloud Dry) \u00b7 Seat ILD 25\u201335; Back ILD 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-C-5DS010",
+      "sku": "TCS-C-5DS010",
+            "claimStatus": "frozen",
+      "claimNote": "Catalog C-5DS010 prints Back 23x20x5 / Seat 23x24x5; TCS stores Back 24x22x6 / Seat 24x24x6. Drop-in claims frozen — locked until re-brief.",
+      "brand": "Classic",
+      "type": "deep seat",
+      "name": "C-5DS010 Universal Deep Seating Boxed & Welted (2pc)",
+      "config": "2pc: boxed & welted back + seat",
+      "dimensions": "Back 24\" \u00d7 22\" \u00d7 6\"; Seat 24\" \u00d7 24\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich (HR + Cloud Dry) \u00b7 Seat ILD 25\u201335; Back ILD 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-BG1-SET",
+      "sku": "TCS-BG1-SET",
+      "brand": "Berlin Gardens",
+      "type": "deep seat",
+      "name": "BG1 Classic Terrace Club (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 24\" \u00d7 25\" \u00d7 6\"; Back 24\" \u00d7 21\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich (HR + Cloud Dry) \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-BG2-OT",
+      "sku": "TCS-BG2-OT",
+      "brand": "Berlin Gardens",
+      "type": "ottoman",
+      "name": "BG2 Classic Terrace Ottoman",
+      "config": "1pc ottoman",
+      "dimensions": "24\" \u00d7 22\" \u00d7 5\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 30\u201340",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-BG3-SET",
+      "sku": "TCS-BG3-SET",
+      "brand": "Berlin Gardens",
+      "type": "deep seat",
+      "name": "BG3 Mayhew Club (2pc w/ Velcro & Welt)",
+      "config": "2pc: seat + back; Velcro & welt",
+      "dimensions": "Seat 24.5\" \u00d7 25\" \u00d7 6\"; Back 24\" \u00d7 22\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-BG4-OT",
+      "sku": "TCS-BG4-OT",
+      "brand": "Berlin Gardens",
+      "type": "ottoman",
+      "name": "BG4 Mayhew Ottoman",
+      "config": "1pc ottoman",
+      "dimensions": "24.5\" \u00d7 22\" \u00d7 5\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 30\u201340",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-BG7-COR",
+      "sku": "TCS-BG7-COR",
+      "brand": "Berlin Gardens",
+      "type": "specialty",
+      "name": "BG7 Classic Terrace Sectional Corner (3pc Back Attached, 1 Seat)",
+      "config": "Corner set: 3 backs attached + 1 seat",
+      "dimensions": "Custom CNC corner geometry \u2014 survey required (\u00b10.125\")",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 6.0,
+      "comLabel": "6.0 yds"
+    },
+    {
+      "id": "TCS-BG8-SET",
+      "sku": "TCS-BG8-SET",
+      "brand": "Berlin Gardens",
+      "type": "deep seat",
+      "name": "BG8 Classic Terrace High-Back Swivel Rocker (2pc)",
+      "config": "2pc: seat + high back",
+      "dimensions": "Seat 22\" \u00d7 20\" \u00d7 3\"; Back 22\" \u00d7 27\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 Seat 30\u201340; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-BG11-COR",
+      "sku": "TCS-BG11-COR",
+      "brand": "Berlin Gardens",
+      "type": "specialty",
+      "name": "BG11 Mayhew Corner (2 Backs Attached, 1 Seat)",
+      "config": "Corner set: 2 backs attached + 1 seat",
+      "dimensions": "Custom CNC corner geometry \u2014 survey required (\u00b10.125\")",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 6.0,
+      "comLabel": "6.0 yds"
+    },
+    {
+      "id": "TCS-BG12-SET",
+      "sku": "TCS-BG12-SET",
+      "brand": "Berlin Gardens",
+      "type": "chaise",
+      "name": "BG12 Classic Terrace Chaise (2pc)",
+      "config": "2pc: chaise seat + back",
+      "dimensions": "Seat 23\" \u00d7 49\" \u00d7 3.5\"; Back 23\" \u00d7 31\" \u00d7 3.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 Seat/Back 20\u201330",
+      "comYd": 5.0,
+      "comLabel": "5.0 yds"
+    },
+    {
+      "id": "TCS-BG16-SET",
+      "sku": "TCS-BG16-SET",
+      "brand": "Berlin Gardens",
+      "type": "chaise",
+      "name": "BG16 Mayhew Chaise (2pc w/ Velcro & Welt)",
+      "config": "2pc: chaise seat + back; Velcro & welt",
+      "dimensions": "Seat 24\" \u00d7 50\" \u00d7 4\"; Back 24\" \u00d7 32\" \u00d7 4\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 Seat/Back 20\u201330",
+      "comYd": 5.0,
+      "comLabel": "5.0 yds"
+    },
+    {
+      "id": "TCS-6001",
+      "sku": "TCS-6001",
+      "brand": "Ebel",
+      "type": "dining",
+      "name": "Ebel 6001 Dining Seat Pad",
+      "config": "1pc dining seat pad",
+      "dimensions": "20\" \u00d7 18\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-6002",
+      "sku": "TCS-6002",
+      "brand": "Ebel",
+      "type": "dining",
+      "name": "Ebel 6002 Large Dining Seat Pad",
+      "config": "1pc large dining seat pad",
+      "dimensions": "23\" \u00d7 19\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-6008-SET",
+      "sku": "TCS-6008-SET",
+      "brand": "Ebel",
+      "type": "deep seat",
+      "name": "Ebel 6008 Avignon Club (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 27\" \u00d7 25.5\" \u00d7 6\"; Back 25\" \u00d7 23\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-6008L-SET",
+      "sku": "TCS-6008L-SET",
+      "brand": "Ebel",
+      "type": "deep seat",
+      "name": "Ebel 6008L Avignon Loveseat (4pc)",
+      "config": "4pc: 2 seats + 2 backs",
+      "dimensions": "2 Seats 25\" \u00d7 25\" \u00d7 6\"; 2 Backs 25\" \u00d7 23\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 6.0,
+      "comLabel": "6.0 yds"
+    },
+    {
+      "id": "TCS-6008S-SET",
+      "sku": "TCS-6008S-SET",
+      "brand": "Ebel",
+      "type": "deep seat",
+      "name": "Ebel 6008S Avignon Sofa (6pc)",
+      "config": "6pc: 3 seats + 3 backs",
+      "dimensions": "3 Seats 24.5\" \u00d7 25\" \u00d7 6\"; 3 Backs 24.5\" \u00d7 25\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 9.0,
+      "comLabel": "9.0 yds"
+    },
+    {
+      "id": "TCS-6009-OT",
+      "sku": "TCS-6009-OT",
+      "brand": "Ebel",
+      "type": "ottoman",
+      "name": "Ebel 6009 Avignon Ottoman",
+      "config": "1pc ottoman",
+      "dimensions": "26\" \u00d7 24\" \u00d7 4\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 30\u201340",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-6012-SET",
+      "sku": "TCS-6012-SET",
+      "brand": "Ebel",
+      "type": "chaise",
+      "name": "Ebel 6012 Avignon Chaise (2pc)",
+      "config": "2pc: chaise seat + back",
+      "dimensions": "Seat 27\" \u00d7 49\" \u00d7 3\"; Back 24\" \u00d7 31\" \u00d7 5\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 Seat/Back 20\u201330",
+      "comYd": 5.0,
+      "comLabel": "5.0 yds"
+    },
+    {
+      "id": "TCS-AVIG-DAY",
+      "sku": "TCS-AVIG-DAY",
+      "brand": "Ebel",
+      "type": "specialty",
+      "name": "Ebel Avignon Daybed",
+      "config": "Daybed seat + back package",
+      "dimensions": "Seat 52\" \u00d7 47.5\" \u00d7 5\"; Back 24\" \u00d7 28\" \u00d7 5\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 Seat/Back 20\u201330",
+      "comYd": 8.0,
+      "comLabel": "8.0 yds"
+    },
+    {
+      "id": "TCS-GEN02",
+      "sku": "TCS-GEN02",
+      "brand": "Gensun",
+      "type": "dining",
+      "name": "GEN02 Dining / balcony / bar stool seat",
+      "config": "1pc dining seat",
+      "dimensions": "20\" \u00d7 18.5\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-GEN15",
+      "sku": "TCS-GEN15",
+      "brand": "Gensun",
+      "type": "bench",
+      "name": "GEN15 Grand Terrace bench",
+      "config": "1pc bench",
+      "dimensions": "41.5\" \u00d7 19.5\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-GEN04",
+      "sku": "TCS-GEN04",
+      "brand": "Gensun",
+      "type": "ottoman",
+      "name": "GEN04 Ottoman",
+      "config": "1pc ottoman",
+      "dimensions": "24\" \u00d7 22\" \u00d7 5\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 30\u201340",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-GEN03-SET",
+      "sku": "TCS-GEN03-SET",
+      "brand": "Gensun",
+      "type": "deep seat",
+      "name": "GEN03 Lounge chair (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 23\" \u00d7 26.5\" \u00d7 6\"; Back 24.5\" \u00d7 21\" \u00d7 5\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-GEN03L-SET",
+      "sku": "TCS-GEN03L-SET",
+      "brand": "Gensun",
+      "type": "deep seat",
+      "name": "GEN03L Loveseat (4pc)",
+      "config": "4pc: 2 seats + 2 backs",
+      "dimensions": "2 Seats 23.5\" \u00d7 26.5\" \u00d7 6\"; 2 Backs 24.5\" \u00d7 21\" \u00d7 5\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 6.0,
+      "comLabel": "6.0 yds"
+    },
+    {
+      "id": "TCS-GEN03S-SET",
+      "sku": "TCS-GEN03S-SET",
+      "brand": "Gensun",
+      "type": "deep seat",
+      "name": "GEN03S Sofa (6pc)",
+      "config": "6pc: 3 seats + 3 backs",
+      "dimensions": "3 Seats 24\" \u00d7 26.5\" \u00d7 6\"; 3 Backs 24.5\" \u00d7 21\" \u00d7 5\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 9.0,
+      "comLabel": "9.0 yds"
+    },
+    {
+      "id": "TCS-GEN01-SET",
+      "sku": "TCS-GEN01-SET",
+      "brand": "Gensun",
+      "type": "chaise",
+      "name": "GEN01 Chaise (2pc)",
+      "config": "2pc: chaise seat + back",
+      "dimensions": "Seat 23.5\" \u00d7 47.5\" \u00d7 5\"; Back 23.5\" \u00d7 29\" \u00d7 5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 20\u201330",
+      "comYd": 5.0,
+      "comLabel": "5.0 yds"
+    },
+    {
+      "id": "TCS-GEN16",
+      "sku": "TCS-GEN16",
+      "brand": "Gensun",
+      "type": "chaise",
+      "name": "GEN16 Grand Terrace double chaise",
+      "config": "1pc double chaise",
+      "dimensions": "49.5\" \u00d7 74\" \u00d7 4\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 20\u201330",
+      "comYd": 10.0,
+      "comLabel": "10.0 yds"
+    },
+    {
+      "id": "TCS-691074",
+      "sku": "TCS-691074",
+      "brand": "Hanamint",
+      "type": "dining",
+      "name": "691074 Dining / Sonoma-Newport chair seat",
+      "config": "1pc dining seat",
+      "dimensions": "20\" \u00d7 18\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-691094",
+      "sku": "TCS-691094",
+      "brand": "Hanamint",
+      "type": "dining",
+      "name": "691094 Tuscany dining seat",
+      "config": "1pc dining seat",
+      "dimensions": "19.6\" \u00d7 17.6\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-691076",
+      "sku": "TCS-691076",
+      "brand": "Hanamint",
+      "type": "dining",
+      "name": "691076 Dining seat",
+      "config": "1pc dining seat",
+      "dimensions": "20\" \u00d7 20\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-692054",
+      "sku": "TCS-692054",
+      "brand": "Hanamint",
+      "type": "bench",
+      "name": "692054 Bench",
+      "config": "1pc bench",
+      "dimensions": "39\" \u00d7 17.7\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 2.0,
+      "comLabel": "2.0 yds"
+    },
+    {
+      "id": "TCS-692224",
+      "sku": "TCS-692224",
+      "brand": "Hanamint",
+      "type": "bench",
+      "name": "692224 Bench",
+      "config": "1pc bench",
+      "dimensions": "40\" \u00d7 20\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 2.0,
+      "comLabel": "2.0 yds"
+    },
+    {
+      "id": "TCS-693224",
+      "sku": "TCS-693224",
+      "brand": "Hanamint",
+      "type": "chaise",
+      "name": "693224 Chaise (hinged)",
+      "config": "1pc hinged chaise",
+      "dimensions": "24\" \u00d7 82\" \u00d7 3.5\" (Back break at 30\")",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 20\u201330",
+      "comYd": 3.5,
+      "comLabel": "3.5 yds"
+    },
+    {
+      "id": "TCS-693084",
+      "sku": "TCS-693084",
+      "brand": "Hanamint",
+      "type": "chaise",
+      "name": "693084 Chaise (hinged)",
+      "config": "1pc hinged chaise",
+      "dimensions": "23\" \u00d7 72\" \u00d7 3.5\" (Back break at 27\")",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-696094",
+      "sku": "TCS-696094",
+      "brand": "Hanamint",
+      "type": "chaise",
+      "name": "696094 Chaise (hinged)",
+      "config": "1pc hinged chaise",
+      "dimensions": "24\" \u00d7 77.5\" \u00d7 3.5\" (Back break at 31\")",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-693104-SET",
+      "sku": "TCS-693104-SET",
+      "brand": "Hanamint",
+      "type": "chaise",
+      "name": "693104 Chaise seat + ottoman",
+      "config": "2pc: chaise seat + ottoman",
+      "dimensions": "Seat 25\" \u00d7 55.5\" \u00d7 3.5\" (b/31); Ottoman 24\" \u00d7 24\" \u00d7 3.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 Seat 20\u201330; Ottoman 30\u201340",
+      "comYd": 3.5,
+      "comLabel": "3.5 yds"
+    },
+    {
+      "id": "TCS-693524",
+      "sku": "TCS-693524",
+      "brand": "Hanamint",
+      "type": "chaise",
+      "name": "693524 Double chaise (hinged)",
+      "config": "1pc hinged double chaise",
+      "dimensions": "48.5\" \u00d7 81.5\" \u00d7 3.5\" (Back break at 30\")",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 20\u201330",
+      "comYd": 10.0,
+      "comLabel": "10.0 yds"
+    },
+    {
+      "id": "TCS-694096-SET",
+      "sku": "TCS-694096-SET",
+      "brand": "Hanamint",
+      "type": "deep seat",
+      "name": "694096 Deep seating (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 25\" \u00d7 25\" \u00d7 3\"; Back 26.5\" \u00d7 17\" \u00d7 3\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 Seat 30\u201340; Back 20\u201330",
+      "comYd": 2.5,
+      "comLabel": "2.5 yds"
+    },
+    {
+      "id": "TCS-694106-SET",
+      "sku": "TCS-694106-SET",
+      "brand": "Hanamint",
+      "type": "deep seat",
+      "name": "694106 Deep seating club (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 24\" \u00d7 25\" \u00d7 6\"; Back 27\" \u00d7 21\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-695224",
+      "sku": "TCS-695224",
+      "brand": "Hanamint",
+      "type": "ottoman",
+      "name": "695224 Ottoman",
+      "config": "1pc ottoman",
+      "dimensions": "25.5\" \u00d7 25\" \u00d7 5\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 30\u201340",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-694094-SET",
+      "sku": "TCS-694094-SET",
+      "brand": "Hanamint",
+      "type": "deep seat",
+      "name": "694094 Sofa / multi-back deep seating",
+      "config": "1 seat + 3 backs",
+      "dimensions": "Seat 60\" \u00d7 25\" \u00d7 6\"; 3 Backs 28.5\" \u00d7 24.5\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 8.0,
+      "comLabel": "8.0 yds"
+    },
+    {
+      "id": "TCS-694936-SET",
+      "sku": "TCS-694936-SET",
+      "brand": "Hanamint",
+      "type": "specialty",
+      "name": "694936 Deep seating specialty (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 29.5\" \u00d7 38.5\" \u00d7 7\"; Back 26\" \u00d7 40\" \u00d7 7\"",
+      "coreSpec": "Composite Sandwich (HR + Cloud Dry) \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 5.0,
+      "comLabel": "5.0 yds"
+    },
+    {
+      "id": "TCS-695126",
+      "sku": "TCS-695126",
+      "brand": "Hanamint",
+      "type": "specialty",
+      "name": "695126 Round cushion",
+      "config": "1pc round",
+      "dimensions": "48\" Round \u00d7 7\"",
+      "coreSpec": "Composite Sandwich \u00b7 ILD 25\u201335",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-NC270C-SET",
+      "sku": "TCS-NC270C-SET",
+      "brand": "North Cape",
+      "type": "deep seat",
+      "name": "NC270C Club chair (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 25.5\" \u00d7 24\" \u00d7 6\"; Back 24.5\" \u00d7 18\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-NC270LS-SET",
+      "sku": "TCS-NC270LS-SET",
+      "brand": "North Cape",
+      "type": "deep seat",
+      "name": "NC270LS Loveseat (4pc)",
+      "config": "4pc: 2 seats + 2 backs",
+      "dimensions": "2 Seats 25.5\" \u00d7 24\" \u00d7 6\"; 2 Backs 24.5\" \u00d7 18\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 6.0,
+      "comLabel": "6.0 yds"
+    },
+    {
+      "id": "TCS-NC270SF-SET",
+      "sku": "TCS-NC270SF-SET",
+      "brand": "North Cape",
+      "type": "deep seat",
+      "name": "NC270SF Sofa (6pc)",
+      "config": "6pc: 3 seats + 3 backs",
+      "dimensions": "3 Seats 25.5\" \u00d7 24\" \u00d7 6\"; 3 Backs 24.5\" \u00d7 18\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 9.0,
+      "comLabel": "9.0 yds"
+    },
+    {
+      "id": "TCS-NC-DS24-SET",
+      "sku": "TCS-NC-DS24-SET",
+      "brand": "North Cape",
+      "type": "deep seat",
+      "name": "NC-DS24 Deep seating (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 24\" \u00d7 24\" \u00d7 5\"; Back 24\" \u00d7 20\" \u00d7 5\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-NC-CH74",
+      "sku": "TCS-NC-CH74",
+      "brand": "North Cape",
+      "type": "chaise",
+      "name": "NC-CH74 Chaise (hinged)",
+      "config": "1pc hinged chaise",
+      "dimensions": "23\" \u00d7 74\" \u00d7 4\" (Hinged at 44\")",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 20\u201330",
+      "comYd": 4.0,
+      "comLabel": "4.0 yds"
+    },
+    {
+      "id": "TCS-PW-DN01",
+      "sku": "TCS-PW-DN01",
+      "brand": "Polywood",
+      "type": "dining",
+      "name": "PW-DN01 Dining seat",
+      "config": "1pc dining seat",
+      "dimensions": "18.5\" \u00d7 17.5\" \u00d7 2.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-PW-ADR",
+      "sku": "TCS-PW-ADR",
+      "brand": "Polywood",
+      "type": "specialty",
+      "name": "PW-ADR Classic Adirondack",
+      "config": "1pc seat/back Adirondack profile",
+      "dimensions": "20.5\" \u00d7 49\" \u00d7 2.5\" (Seat 18\"D / Back 31\"H)",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 2.5,
+      "comLabel": "2.5 yds"
+    },
+    {
+      "id": "TCS-PW-ADR-S",
+      "sku": "TCS-PW-ADR-S",
+      "brand": "Polywood",
+      "type": "specialty",
+      "name": "PW-ADR-S Adirondack seat (slim)",
+      "config": "1pc seat pad",
+      "dimensions": "20.5\" \u00d7 18\" \u00d7 2\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-PW-DS01-SET",
+      "sku": "TCS-PW-DS01-SET",
+      "brand": "Polywood",
+      "type": "deep seat",
+      "name": "PW-DS01 Deep seating (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 23\" \u00d7 24\" \u00d7 5\"; Back 23\" \u00d7 21\" \u00d7 5\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-PW-OT01",
+      "sku": "TCS-PW-OT01",
+      "brand": "Polywood",
+      "type": "ottoman",
+      "name": "PW-OT01 Ottoman",
+      "config": "1pc ottoman",
+      "dimensions": "23\" \u00d7 21\" \u00d7 4.5\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 30\u201340",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-PW-CH01",
+      "sku": "TCS-PW-CH01",
+      "brand": "Polywood",
+      "type": "chaise",
+      "name": "PW-CH01 Chaise (hinged)",
+      "config": "1pc hinged chaise",
+      "dimensions": "22\" \u00d7 78\" \u00d7 2.5\" (Hinged at 48\")",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 20\u201330",
+      "comYd": 3.5,
+      "comLabel": "3.5 yds"
+    },
+    {
+      "id": "TCS-JJ1501",
+      "sku": "TCS-JJ1501",
+      "brand": "Jensen Leisure",
+      "type": "chaise",
+      "name": "JJ1501 Chaise / lounge pad",
+      "config": "1pc thin chaise pad",
+      "dimensions": "23\" \u00d7 75\" \u00d7 1.5\"",
+      "coreSpec": "HR polyurethane \u00b7 ILD 30\u201340",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-JJ-DN01",
+      "sku": "TCS-JJ-DN01",
+      "brand": "Jensen Leisure",
+      "type": "dining",
+      "name": "JJ-DN01 Dining",
+      "config": "1pc dining seat",
+      "dimensions": "19\" \u00d7 18\" \u00d7 2\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-JJ-DS01-SET",
+      "sku": "TCS-JJ-DS01-SET",
+      "brand": "Jensen Leisure",
+      "type": "deep seat",
+      "name": "JJ-DS01 Deep seating (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 24\" \u00d7 24\" \u00d7 5\"; Back 24\" \u00d7 20\" \u00d7 5\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-ES-DN01",
+      "sku": "TCS-ES-DN01",
+      "brand": "Erwin & Sons",
+      "type": "dining",
+      "name": "ES-DN01 Dining",
+      "config": "1pc dining seat",
+      "dimensions": "19.5\" \u00d7 19\" \u00d7 2.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-ES-DS01-SET",
+      "sku": "TCS-ES-DS01-SET",
+      "brand": "Erwin & Sons",
+      "type": "deep seat",
+      "name": "ES-DS01 Deep seating (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 24\" \u00d7 25\" \u00d7 5.5\"; Back 24\" \u00d7 21\" \u00d7 5.5\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-ES-CH01",
+      "sku": "TCS-ES-CH01",
+      "brand": "Erwin & Sons",
+      "type": "chaise",
+      "name": "ES-CH01 Chaise",
+      "config": "1pc chaise",
+      "dimensions": "24\" \u00d7 76\" \u00d7 3.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 20\u201330",
+      "comYd": 3.5,
+      "comLabel": "3.5 yds"
+    },
+    {
+      "id": "TCS-ES-OT01",
+      "sku": "TCS-ES-OT01",
+      "brand": "Erwin & Sons",
+      "type": "ottoman",
+      "name": "ES-OT01 Ottoman",
+      "config": "1pc ottoman",
+      "dimensions": "24\" \u00d7 22\" \u00d7 5\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 30\u201340",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-C-L1201",
+      "sku": "TCS-C-L1201",
+      "brand": "Lloyd Flanders",
+      "type": "dining",
+      "name": "C-L1201 L.F. Heirloom Dining Seat",
+      "config": "1pc dining seat",
+      "dimensions": "18.5\" \u00d7 18.5\" \u00d7 2.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-C-L1202",
+      "sku": "TCS-C-L1202",
+      "brand": "Lloyd Flanders",
+      "type": "dining",
+      "name": "C-L1202 L.F. Heirloom Rocker/Lounge Dining Seat",
+      "config": "1pc seat",
+      "dimensions": "21\" \u00d7 18\" \u00d7 2.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-C-L1204",
+      "sku": "TCS-C-L1204",
+      "brand": "Lloyd Flanders",
+      "type": "dining",
+      "name": "C-L1204 L.F. Heirloom Loveseat (2 cushions matched)",
+      "config": "2 matched seat cushions",
+      "dimensions": "2 Seats 19.5\" \u00d7 17.5\" \u00d7 2.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 2.0,
+      "comLabel": "2.0 yds"
+    },
+    {
+      "id": "TCS-C-L1205",
+      "sku": "TCS-C-L1205",
+      "brand": "Lloyd Flanders",
+      "type": "ottoman",
+      "name": "C-L1205 L.F. Heirloom Ottoman",
+      "config": "1pc ottoman",
+      "dimensions": "20\" \u00d7 20\" \u00d7 2.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 30\u201340",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-C-L1209-SET",
+      "sku": "TCS-C-L1209-SET",
+      "brand": "Lloyd Flanders",
+      "type": "chaise",
+      "name": "C-L1209 L.F. Heirloom Adjustable Chaise (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 20.5\" \u00d7 45.5\" \u00d7 2\"; Back 26\" \u00d7 28\" \u00d7 2.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 Seat/Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-C-L1210-SET",
+      "sku": "TCS-C-L1210-SET",
+      "brand": "Lloyd Flanders",
+      "type": "deep seat",
+      "name": "C-L1210 L.F. Reflections Lounge Chair/Rocker (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 23.5\" \u00d7 23\" \u00d7 5\"; Back 23\" \u00d7 19\" \u00d7 5\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-C-L1211",
+      "sku": "TCS-C-L1211",
+      "brand": "Lloyd Flanders",
+      "type": "dining",
+      "name": "C-L1211 L.F. Reflections Dining Seat",
+      "config": "1pc dining seat",
+      "dimensions": "21.5\" \u00d7 19\" \u00d7 4\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-C-L1212-SET",
+      "sku": "TCS-C-L1212-SET",
+      "brand": "Lloyd Flanders",
+      "type": "chaise",
+      "name": "C-L1212 L.F. Reflections Chaise (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 22\" \u00d7 51\" \u00d7 5\"; Back 23\" \u00d7 23\" \u00d7 5\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 Seat/Back 20\u201330",
+      "comYd": 4.0,
+      "comLabel": "4.0 yds"
+    },
+    {
+      "id": "TCS-C-L1213",
+      "sku": "TCS-C-L1213",
+      "brand": "Lloyd Flanders",
+      "type": "ottoman",
+      "name": "C-L1213 L.F. Reflections Ottoman",
+      "config": "1pc ottoman",
+      "dimensions": "23\" \u00d7 23\" \u00d7 4\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 30\u201340",
+      "comYd": 2.0,
+      "comLabel": "2.0 yds"
+    },
+    {
+      "id": "TCS-C-L1216",
+      "sku": "TCS-C-L1216",
+      "brand": "Lloyd Flanders",
+      "type": "dining",
+      "name": "C-L1216 Embassy Dining Chair Seat",
+      "config": "1pc dining seat",
+      "dimensions": "22.5\" \u00d7 19\" \u00d7 2.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-C-L1217-SET",
+      "sku": "TCS-C-L1217-SET",
+      "brand": "Lloyd Flanders",
+      "type": "deep seat",
+      "name": "C-L1217 Embassy Lounge Chair (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 25\" \u00d7 25\" \u00d7 5\"; Back 26\" \u00d7 23\" \u00d7 5\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-C-L1218",
+      "sku": "TCS-C-L1218",
+      "brand": "Lloyd Flanders",
+      "type": "ottoman",
+      "name": "C-L1218 Embassy Ottoman",
+      "config": "1pc ottoman",
+      "dimensions": "24\" \u00d7 25\" \u00d7 5\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 30\u201340",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-38902SB-SET",
+      "sku": "TCS-38902SB-SET",
+      "brand": "Lloyd Flanders",
+      "type": "specialty",
+      "name": "38902SB Contempo / specialty lounge (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 25\" \u00d7 25\" \u00d7 6\"; Back 25\" \u00d7 20\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-LFH1",
+      "sku": "TCS-LFH1",
+      "brand": "Lloyd Flanders",
+      "type": "dining",
+      "name": "LFH1 Haven one-piece dining",
+      "config": "1pc dining",
+      "dimensions": "20\" \u00d7 19\" \u00d7 2.5\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-SC-ADR",
+      "sku": "TCS-SC-ADR",
+      "brand": "Seaside Casual",
+      "type": "specialty",
+      "name": "SC-ADR Adirondack",
+      "config": "1pc seat/back Adirondack profile",
+      "dimensions": "20.5\" \u00d7 49\" \u00d7 2.5\" (18\" Seat / 31\" Back)",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 2.5,
+      "comLabel": "2.5 yds"
+    },
+    {
+      "id": "TCS-SC-PM-DN",
+      "sku": "TCS-SC-PM-DN",
+      "brand": "Seaside Casual",
+      "type": "dining",
+      "name": "SC-PM-DN Dining",
+      "config": "1pc dining seat",
+      "dimensions": "19\" \u00d7 18\" \u00d7 2\"",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 35\u201345",
+      "comYd": 1.0,
+      "comLabel": "1.0 yd"
+    },
+    {
+      "id": "TCS-SC-CS-SB-SET",
+      "sku": "TCS-SC-CS-SB-SET",
+      "brand": "Seaside Casual",
+      "type": "deep seat",
+      "name": "SC-CS-S / SC-CS-B Deep seating seat & back",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 24\" \u00d7 24\" \u00d7 5.5\"; Back 24\" \u00d7 20\" \u00d7 5.5\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-SC-SB-CH",
+      "sku": "TCS-SC-SB-CH",
+      "brand": "Seaside Casual",
+      "type": "chaise",
+      "name": "SC-SB-CH Chaise",
+      "config": "1pc chaise seat/back profile",
+      "dimensions": "23\" \u00d7 80\" \u00d7 3\" (49\" Seat / 31\" Back)",
+      "coreSpec": "Cloud Dry reticulated \u00b7 ILD 20\u201330",
+      "comYd": 3.5,
+      "comLabel": "3.5 yds"
+    },
+    {
+      "id": "TCS-97031-SET",
+      "sku": "TCS-97031-SET",
+      "brand": "Patio Renaissance",
+      "type": "deep seat",
+      "name": "97031 Lounge chair (2pc)",
+      "config": "2pc: seat + back",
+      "dimensions": "Seat 25\" \u00d7 26\" \u00d7 6\"; Back 25\" \u00d7 21\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 3.0,
+      "comLabel": "3.0 yds"
+    },
+    {
+      "id": "TCS-970190-SET",
+      "sku": "TCS-970190-SET",
+      "brand": "Patio Renaissance",
+      "type": "specialty",
+      "name": "970190 Corner (seat + 2 backs)",
+      "config": "Corner: 1 seat + 2 backs",
+      "dimensions": "Corner Seat 30\" \u00d7 30\" \u00d7 6\"; 2 Backs 26\" \u00d7 21\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 6.0,
+      "comLabel": "6.0 yds"
+    },
+    {
+      "id": "TCS-97022-SET",
+      "sku": "TCS-97022-SET",
+      "brand": "Patio Renaissance",
+      "type": "deep seat",
+      "name": "97022 Loveseat (4pc)",
+      "config": "4pc: 2 seats + 2 backs",
+      "dimensions": "2 Seats 24.5\" \u00d7 26\" \u00d7 6\"; 2 Backs 24.5\" \u00d7 21\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 6.0,
+      "comLabel": "6.0 yds"
+    },
+    {
+      "id": "TCS-97033-SET",
+      "sku": "TCS-97033-SET",
+      "brand": "Patio Renaissance",
+      "type": "deep seat",
+      "name": "97033 Sofa (6pc)",
+      "config": "6pc: 3 seats + 3 backs",
+      "dimensions": "3 Seats 24\" \u00d7 26\" \u00d7 6\"; 3 Backs 24\" \u00d7 21\" \u00d7 6\"",
+      "coreSpec": "Composite Sandwich \u00b7 Seat 25\u201335; Back 20\u201330",
+      "comYd": 9.0,
+      "comLabel": "9.0 yds"
+    },
+    {
+      "id": "TCS-97015",
+      "sku": "TCS-97015",
+      "brand": "Patio Renaissance",
+      "type": "ottoman",
+      "name": "97015 Ottoman",
+      "config": "1pc ottoman",
+      "dimensions": "25\" \u00d7 23\" \u00d7 5\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 ILD 30\u201340",
+      "comYd": 1.5,
+      "comLabel": "1.5 yds"
+    },
+    {
+      "id": "TCS-97040-SET",
+      "sku": "TCS-97040-SET",
+      "brand": "Patio Renaissance",
+      "type": "chaise",
+      "name": "97040 Chaise (2pc)",
+      "config": "2pc: chaise seat + back",
+      "dimensions": "Seat 26\" \u00d7 50\" \u00d7 4\"; Back 26\" \u00d7 32\" \u00d7 4\"",
+      "coreSpec": "Cloud Dry + HR sandwich \u00b7 Seat/Back 20\u201330",
+      "comYd": 5.0,
+      "comLabel": "5.0 yds"
+    }
+  ]
+};
+
+  (function () {
+    const state = {
+      step: 1,
+      brand: null,
+      type: null,
+      piece: null,
+      fabric: null,
+      qty: 2,
+      welt: true,
+      ties: false,
+      boxing: true
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const brandChoices = $('brandChoices');
+    const typeChoices = $('typeChoices');
+    const pieceChoices = $('pieceChoices');
+    const fabricChoices = $('fabricChoices');
+
+    function parseBoardFt(piece) {
+      // Rough volume from first three inch numbers; fallback by type
+      const nums = (piece.dimensions.match(/(\d+(?:\.\d+)?)/g) || []).map(Number);
+      let vol = 0;
+      if (nums.length >= 3) vol = (nums[0] * nums[1] * nums[2]) / 144;
+      else if (nums.length === 2) vol = (nums[0] * nums[1] * 3) / 144;
+      if (!vol || !isFinite(vol)) {
+        const fallback = { pillow: 0.4, dining: 0.8, ottoman: 1.1, 'deep seat': 2.2, chaise: 3.5, bench: 2.0, specialty: 1.8 };
+        vol = fallback[piece.type] || 1.2;
+      }
+      return Math.max(0.35, vol);
+    }
+
+    function qtyMult(qty) {
+      let m = 1;
+      masterData.pricing.qtyBreaks.forEach(b => { if (qty >= b.min) m = b.mult; });
+      return m;
+    }
+
+    function priceConfig() {
+      if (!state.piece || !state.fabric) return null;
+      const p = masterData.pricing;
+      const piece = state.piece;
+      const fabric = state.fabric;
+      const typeMeta = masterData.pieceTypes.find(t => t.id === piece.type) || { base: 220 };
+      const boardFt = parseBoardFt(piece);
+      const core = boardFt * p.cloudDryCorePerBoardFt;
+      const fabricCost = fabric.tier === 'COM'
+        ? piece.comYd * p.comSewOnlyPerYd
+        : piece.comYd * fabric.perYd;
+      let unit = typeMeta.base + core + fabricCost + p.laborPerPiece;
+      if (state.welt) unit += p.weltAdd;
+      if (state.ties) unit += p.tiesAdd;
+      if (state.boxing) unit += p.boxingAdd;
+      unit *= qtyMult(state.qty);
+      const total = unit * state.qty;
+      return {
+        unit: Math.round(unit),
+        total: Math.round(total),
+        boardFt: boardFt.toFixed(2),
+        fabricCost: Math.round(fabricCost),
+        core: Math.round(core),
+        break: qtyMult(state.qty)
+      };
+    }
+
+    function updateSummary() {
+      $('sumBrand').textContent = state.brand || '—';
+      $('sumPiece').textContent = state.piece ? (state.piece.sku + ' · ' + state.piece.dimensions) : '—';
+      $('sumFabric').textContent = state.fabric ? state.fabric.name : '—';
+      $('sumQty').textContent = String(state.qty);
+      const pr = priceConfig();
+      if (!pr) {
+        $('sumPrice').textContent = '$—';
+        $('sumBreakdown').textContent = state.brand ? 'Keep going through the steps for a live estimate.' : 'Select a brand to begin.';
+        return;
+      }
+      $('sumPrice').textContent = '$' + pr.total.toLocaleString();
+      $('sumBreakdown').textContent = '~$' + pr.unit + '/pc · Cloud Dry core ~' + pr.boardFt + ' bd-ft · fabric line $' + pr.fabricCost + (pr.break < 1 ? ' · qty break ' + Math.round((1-pr.break)*100) + '% off' : '');
+    }
+
+    function showStep(n) {
+      state.step = n;
+      [1,2,3,4].forEach(i => {
+        const el = $('step' + i);
+        if (el) el.hidden = i !== n;
+      });
+      document.querySelectorAll('.step-pill').forEach(pill => {
+        const s = Number(pill.getAttribute('data-step'));
+        pill.classList.toggle('active', s === n);
+        pill.classList.toggle('done', s < n);
+      });
+      $('btnBack').hidden = n === 1;
+      $('btnNext').textContent = n === 4 ? 'Start another' : (n === 3 ? 'See price' : 'Continue');
+      if (n === 4) renderReview();
+      updateSummary();
+    }
+
+    const FROZEN_IDS = { 'TCS-C-31D': 1, 'TCS-C-55W4': 1, 'TCS-C-5DS010': 1 };
+    function isFrozen(row) {
+      return !!(row && (row.claimStatus === 'frozen' || FROZEN_IDS[row.id]));
+    }
+    // Sync claim flags from fit-data.js onto builder pieces (authority for dims/COM + freezes)
+    (function syncClaimFlags() {
+      const src = window.TCS_SKUS || [];
+      const byId = {};
+      src.forEach(s => { byId[s.id] = s; });
+      masterData.pieces.forEach(p => {
+        const s = byId[p.id];
+        if (!s) return;
+        if (s.claimStatus) p.claimStatus = s.claimStatus;
+        if (s.claimNote) p.claimNote = s.claimNote;
+        if (FROZEN_IDS[p.id]) { p.claimStatus = 'frozen'; p.claimNote = p.claimNote || s.claimNote; }
+      });
+    })();
+
+    function renderBrands() {
+      brandChoices.innerHTML = masterData.brands.map(b => {
+        const count = masterData.pieces.filter(p => p.brand === b).length;
+        const sel = state.brand === b ? ' selected' : '';
+        return '<button type="button" class="choice' + sel + '" data-brand="' + b.replace(/"/g,'&quot;') + '"><strong>' + b + '</strong><span class="meta">' + count + ' drop-ins</span></button>';
+      }).join('');
+    }
+
+    function renderTypes() {
+      typeChoices.innerHTML = masterData.pieceTypes.map(t => {
+        const count = masterData.pieces.filter(p => p.brand === state.brand && p.type === t.id).length;
+        if (!count) return '';
+        const sel = state.type === t.id ? ' selected' : '';
+        return '<button type="button" class="choice' + sel + '" data-type="' + t.id + '"><strong>' + t.name + '</strong><span class="meta">' + count + ' · from $' + t.base + '</span></button>';
+      }).join('');
+    }
+
+    function renderPieces() {
+      const list = masterData.pieces.filter(p => p.brand === state.brand && (!state.type || p.type === state.type));
+      if (!list.length) {
+        pieceChoices.innerHTML = '<div class="empty-state">No pieces for this filter. Try another type.</div>';
+        return;
+      }
+      pieceChoices.innerHTML = list.map(p => {
+        const frozen = isFrozen(p);
+        const sel = state.piece && state.piece.id === p.id ? ' selected' : '';
+        const freezeMeta = frozen ? '<span class="meta meta-freeze">Dim conflict — frozen (not selectable for drop-in)</span>' : '';
+        const disabled = frozen ? ' disabled aria-disabled="true"' : '';
+        return '<button type="button" class="choice' + sel + (frozen ? ' is-frozen' : '') + '" data-id="' + p.id + '"' + disabled + '><strong>' + p.sku + '</strong><span class="meta">' + p.name + '</span><span class="meta">' + p.dimensions + ' · COM ' + p.comLabel + '</span>' + freezeMeta + '</button>';
+      }).join('');
+    }
+
+    function renderFabrics() {
+      fabricChoices.innerHTML = masterData.fabrics.map(f => {
+        const sel = state.fabric && state.fabric.id === f.id ? ' selected' : '';
+        const price = f.tier === 'COM' ? 'Sew-only pricing' : ('$' + f.perYd + '/yd');
+        return '<button type="button" class="choice' + sel + '" data-fabric="' + f.id + '"><div class="swatch" style="background:' + f.swatch + '"></div><strong>' + f.name + '</strong><span class="meta">' + f.tier + ' · ' + price + '</span><span class="meta">' + f.note + '</span></button>';
+      }).join('');
+    }
+
+    function renderReview() {
+      const pr = priceConfig();
+      const opts = [];
+      if (state.welt) opts.push('welt');
+      if (state.ties) opts.push('ties');
+      if (state.boxing) opts.push('boxing');
+      $('reviewCopy').innerHTML = '
+        <p><strong>' + state.piece.sku + '</strong> — ' + state.piece.name + '</p>
+        <p>' + state.piece.config + '<br>' + state.piece.dimensions + '<br>' + state.piece.coreSpec + '<br>COM yield ' + state.piece.comLabel + '</p>
+        <p>Fabric: <strong>' + state.fabric.name + '</strong> (' + state.fabric.tier + ')<br>Finish: ' + (opts.join(', ') || 'standard') + '<br>Quantity: <strong>' + state.qty + '</strong></p>
+        <p class="price-big" style="font-size:1.5rem;">Estimated total $' + (pr ? pr.total.toLocaleString() : '—') + '</p>
+      ';
+    }
+
+    brandChoices.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-brand]');
+      if (!btn) return;
+      state.brand = btn.getAttribute('data-brand');
+      state.type = null; state.piece = null;
+      renderBrands(); updateSummary();
+    });
+    typeChoices.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-type]');
+      if (!btn) return;
+      state.type = btn.getAttribute('data-type');
+      state.piece = null;
+      renderTypes(); renderPieces(); updateSummary();
+    });
+    pieceChoices.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-id]');
+      if (!btn || btn.disabled) return;
+      const piece = masterData.pieces.find(p => p.id === btn.getAttribute('data-id'));
+      if (!piece || isFrozen(piece)) return;
+      state.piece = piece;
+      renderPieces(); updateSummary();
+    });
+    fabricChoices.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-fabric]');
+      if (!btn) return;
+      state.fabric = masterData.fabrics.find(f => f.id === btn.getAttribute('data-fabric'));
+      renderFabrics(); updateSummary();
+    });
+
+    ['optWelt','optTies','optBoxing'].forEach(id => {
+      $(id).addEventListener('change', () => {
+        state.welt = $('optWelt').checked;
+        state.ties = $('optTies').checked;
+        state.boxing = $('optBoxing').checked;
+        updateSummary();
+        if (state.step === 4) renderReview();
+      });
+    });
+    $('qty').addEventListener('input', () => {
+      state.qty = Math.max(1, Math.min(99, Number($('qty').value) || 1));
+      updateSummary();
+      if (state.step === 4) renderReview();
+    });
+
+    $('btnNext').addEventListener('click', () => {
+      if (state.step === 1) {
+        if (!state.brand) return alert('Please choose a brand.');
+        renderTypes(); renderPieces(); showStep(2); return;
+      }
+      if (state.step === 2) {
+        if (!state.piece) return alert('Please choose a piece.');
+        if (!state.fabric) state.fabric = masterData.fabrics[0];
+        renderFabrics(); showStep(3); return;
+      }
+      if (state.step === 3) {
+        if (!state.fabric) return alert('Please choose a fabric.');
+        showStep(4); return;
+      }
+      if (state.step === 4) {
+        state.brand = null; state.type = null; state.piece = null; state.fabric = null;
+        renderBrands(); showStep(1);
+      }
+    });
+    $('btnBack').addEventListener('click', () => {
+      if (state.step > 1) showStep(state.step - 1);
+    });
+
+    // Tabs (builder | catalog | custom)
+    const tabBuilder = $('tab-builder');
+    const tabCatalog = $('tab-catalog');
+    const tabCustom = $('tab-custom');
+    const panelBuilder = $('panel-builder');
+    const panelCatalog = $('panel-catalog');
+    const panelCustom = $('panel-custom');
+    function selectTab(which) {
+      const map = {
+        builder: [tabBuilder, panelBuilder],
+        catalog: [tabCatalog, panelCatalog],
+        custom: [tabCustom, panelCustom]
+      };
+      Object.keys(map).forEach(key => {
+        const on = key === which;
+        map[key][0].setAttribute('aria-selected', on ? 'true' : 'false');
+        map[key][1].classList.toggle('active', on);
+        map[key][1].hidden = !on;
+      });
+      if (which === 'custom' && typeof window.__tcsRenderCustom === 'function') {
+        window.__tcsRenderCustom();
+      }
+    }
+    tabBuilder.addEventListener('click', () => selectTab('builder'));
+    tabCatalog.addEventListener('click', () => selectTab('catalog'));
+    tabCustom.addEventListener('click', () => selectTab('custom'));
+
+    // Catalog (uses window.TCS_SKUS)
+    const skus = window.TCS_SKUS || masterData.pieces.map(p => ({
+      id: p.id, modelSku: p.sku, replaces: p.name, config: p.config,
+      dimensions: p.dimensions, coreSpec: p.coreSpec, com: p.comLabel, brand: p.brand, type: p.type,
+      claimStatus: p.claimStatus, claimNote: p.claimNote
+    }));
+    const qEl = $('q'); const brandEl = $('brand'); const typeEl = $('type');
+    const resultsEl = $('results'); const countEl = $('count');
+    const brands = []; const types = [];
+    skus.forEach(row => {
+      if (brands.indexOf(row.brand) === -1) brands.push(row.brand);
+      if (types.indexOf(row.type) === -1) types.push(row.type);
+    });
+    brands.sort(); types.sort();
+    brands.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; brandEl.appendChild(o); });
+    types.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; typeEl.appendChild(o); });
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function haystack(row) {
+      return [row.modelSku, row.replaces, row.config, row.dimensions, row.coreSpec, row.com, row.brand, row.type, row.id, row.claimNote].join(' ').toLowerCase();
+    }
+    function card(row) {
+      const frozen = isFrozen(row);
+      const near = !!(row && row.claimStatus === 'near-match');
+      let dimLabel = 'Exact dimensions';
+      if (frozen) dimLabel = 'Stored dimensions (frozen)';
+      else if (near) dimLabel = 'Style-envelope dimensions';
+      const freezeChip = frozen ? '<span class="chip chip-frozen">Dim conflict — frozen</span>'
+        : (near ? '<span class="chip chip-near">Style envelope — not catalog-exact</span>' : '');
+      const freezeNote = (frozen || near)
+        ? '<p class="freeze-note' + (near && !frozen ? ' near-note' : '') + '">' + escapeHtml(row.claimNote || (frozen
+            ? 'Drop-in claims frozen until Christian re-briefs or confirms dimensions.'
+            : 'Style envelope only — not catalog-exact.')) + '</p>'
+        : '';
+      const cls = frozen ? ' is-frozen' : (near ? ' is-near' : '');
+      return '<article class="sku-card-fit' + cls + '" id="' + escapeHtml(row.id) + '">' +
+        '<div class="chips"><span class="chip">' + escapeHtml(row.brand) + '</span><span class="chip">' + escapeHtml(row.type) + '</span>' + freezeChip + '</div>' +
+        '<div style="font-family:var(--mono);font-size:0.85rem;color:var(--blue);"><strong>TCS SKU</strong> · ' + escapeHtml(row.modelSku) + '</div>' +
+        '<h3>Replaces: ' + escapeHtml(row.replaces) + '</h3>' +
+        freezeNote +
+        '<div class="sku-meta-fit">' +
+          '<div><span>Configuration</span>' + escapeHtml(row.config) + '</div>' +
+          '<div><span>' + dimLabel + '</span>' + escapeHtml(row.dimensions) + '</div>' +
+          '<div><span>Core / ILD*</span>' + escapeHtml(row.coreSpec) + '</div>' +
+          '<div><span>COM 54"</span>' + escapeHtml(row.com) + '</div>' +
+        '</div></article>';
+    }
+    function applyCatalog() {
+      const query = (qEl.value || '').trim().toLowerCase();
+      const brand = brandEl.value; const type = typeEl.value;
+      const matches = skus.filter(row => {
+        if (brand && row.brand !== brand) return false;
+        if (type && row.type !== type) return false;
+        if (query && haystack(row).indexOf(query) === -1) return false;
+        return true;
+      });
+      countEl.innerHTML = '<strong>' + matches.length + '</strong> of ' + skus.length + ' SKUs';
+      resultsEl.innerHTML = matches.length ? matches.map(card).join('') :
+        '<div class="empty-state"><h2>No SKUs match</h2><p>Try another OEM code, brand, or clear filters.</p></div>';
+    }
+    qEl.addEventListener('input', applyCatalog);
+    brandEl.addEventListener('change', applyCatalog);
+    typeEl.addEventListener('change', applyCatalog);
+    $('resetCatalog').addEventListener('click', (e) => { e.preventDefault(); qEl.value=''; brandEl.value=''; typeEl.value=''; applyCatalog(); });
+
+
+    // --- A) Search-first OEM on Interactive Fit Tool ---
+    const oemQ = $('oemQ');
+    const oemResults = $('oemResults');
+    const oemEmpty = $('oemEmpty');
+
+    function pieceHay(p) {
+      return [p.sku, p.id, p.name, p.config, p.dimensions, p.coreSpec, p.comLabel, p.brand, p.type, p.claimNote]
+        .join(' ').toLowerCase();
+    }
+
+    function selectPieceFromSearch(pieceId) {
+      const piece = masterData.pieces.find(p => p.id === pieceId);
+      if (!piece || isFrozen(piece)) return;
+      state.brand = piece.brand;
+      state.type = piece.type;
+      state.piece = piece;
+      if (!state.fabric) state.fabric = masterData.fabrics[0];
+      renderBrands();
+      renderTypes();
+      renderPieces();
+      renderFabrics();
+      showStep(3);
+      updateSummary();
+      if (oemQ) oemQ.blur();
+      const host = $('step3');
+      if (host) host.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderOemHits() {
+      if (!oemQ) return;
+      const q = (oemQ.value || '').trim().toLowerCase();
+      if (!q) {
+        oemResults.hidden = true;
+        oemResults.innerHTML = '';
+        oemEmpty.hidden = true;
+        return;
+      }
+      const hits = masterData.pieces.filter(p => pieceHay(p).indexOf(q) !== -1)
+        .sort((a, b) => (isFrozen(a) ? 1 : 0) - (isFrozen(b) ? 1 : 0))
+        .slice(0, 24);
+      if (!hits.length) {
+        oemResults.hidden = true;
+        oemResults.innerHTML = '';
+        oemEmpty.hidden = false;
+        return;
+      }
+      oemEmpty.hidden = true;
+      oemResults.hidden = false;
+      oemResults.innerHTML = hits.map(p => {
+        const frozen = isFrozen(p);
+        const near = p.claimStatus === 'near-match';
+        const cls = frozen ? ' is-frozen' : (near ? ' is-near' : '');
+        const flag = frozen
+          ? '<span class="flag flag-frozen">Dim conflict — frozen / not selectable</span>'
+          : (near ? '<span class="flag flag-near">Style envelope — not catalog-exact</span>' : '');
+        const disabled = frozen ? ' disabled aria-disabled="true"' : '';
+        const dimPrefix = frozen ? 'Stored dims (frozen): ' : (near ? 'Style-envelope dims: ' : '');
+        return '<button type="button" class="oem-hit' + cls + '" data-oem-id="' + escapeHtml(p.id) + '"' + disabled + '>' +
+          '<span class="sku">' + escapeHtml(p.sku) + '</span>' +
+          '<span class="replaces">Replaces: ' + escapeHtml(p.name) + '</span>' +
+          '<span class="meta-line">' + dimPrefix + escapeHtml(p.dimensions) + ' · COM ' + escapeHtml(p.comLabel) + '</span>' +
+          '<span class="meta-line">' + escapeHtml(p.coreSpec) + ' *</span>' +
+          '<span class="meta-line">' + escapeHtml(p.brand) + ' · ' + escapeHtml(p.type) + ' · fitment ID only</span>' +
+          flag +
+          '</button>';
+      }).join('');
+    }
+
+    if (oemQ) {
+      oemQ.addEventListener('input', renderOemHits);
+      oemResults.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-oem-id]');
+        if (!btn || btn.disabled) return;
+        selectPieceFromSearch(btn.getAttribute('data-oem-id'));
+      });
+    }
+    const oemJump = $('oemJumpCatalog');
+    if (oemJump) {
+      oemJump.addEventListener('click', () => {
+        const q = (oemQ && oemQ.value) || '';
+        qEl.value = q;
+        selectTab('catalog');
+        applyCatalog();
+        qEl.focus();
+      });
+    }
+
+    // --- B) Custom Cushion Maker ---
+    function escSvg(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function num(id, fallback) {
+      const v = Number($(id) && $(id).value);
+      return (isFinite(v) && v > 0) ? v : fallback;
+    }
+    function fmtIn(n) {
+      const x = Math.round(n * 100) / 100;
+      return (Number.isInteger(x) ? String(x) : String(x)) + '"';
+    }
+
+    function buildCustomSvg() {
+      const frame = $('cmFrame').value;
+      const is2 = frame === 'deep seat 2pc';
+      const brandNote = (($('cmBrandNote') && $('cmBrandNote').value) || '').trim();
+      const ties = $('cmTies').checked;
+      const welt = $('cmWelt').checked;
+      const boxing = $('cmBoxing').checked;
+      const finish = [ties ? 'ties' : null, welt ? 'welt' : null, boxing ? 'boxing' : null].filter(Boolean).join(' · ') || 'plain';
+
+      const W = 720, H = is2 ? 560 : 500;
+      const margin = 72;
+      let pieces = [];
+      if (is2) {
+        pieces = [
+          { label: 'SEAT', w: num('cmSeatW', 24), d: num('cmSeatD', 26), t: num('cmSeatT', 5) },
+          { label: 'BACK', w: num('cmBackW', 24), d: num('cmBackD', 22), t: num('cmBackT', 5) }
+        ];
+      } else {
+        pieces = [{ label: frame.toUpperCase(), w: num('cmW', 24), d: num('cmD', 24), t: num('cmT', 4) }];
+      }
+
+      const gap = 36;
+      const maxW = Math.max.apply(null, pieces.map(p => p.w));
+      const totalD = pieces.reduce((s, p) => s + p.d, 0) + (pieces.length - 1) * (gap / 8);
+      const availW = W - margin * 2 - 40;
+      const availH = H - margin * 2 - 90;
+      const scale = Math.min(availW / maxW, availH / Math.max(totalD, 1), 14);
+
+      let yCursor = margin + 48;
+      const rects = [];
+      pieces.forEach((p, i) => {
+        const rw = p.w * scale;
+        const rd = p.d * scale;
+        const x = (W - rw) / 2;
+        const y = yCursor;
+        rects.push({ p, x, y, rw, rd });
+        yCursor += rd + gap;
+      });
+
+      let body = '';
+      // title block
+      body += '<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#ffffff"/>';
+      body += '<rect x="0" y="0" width="' + W + '" height="44" fill="#3B8FD4"/>';
+      body += '<text x="18" y="28" fill="#ffffff" font-family="Georgia, serif" font-size="16" font-weight="700">The Cushion Store · Cloud Dry</text>';
+      body += '<text x="' + (W - 18) + '" y="28" fill="#B8D9F5" font-family="system-ui,sans-serif" font-size="12" text-anchor="end">Milwaukee, WI · Custom Quote Drawing</text>';
+
+      rects.forEach(({ p, x, y, rw, rd }) => {
+        // cushion plan
+        body += '<rect x="' + x + '" y="' + y + '" width="' + rw + '" height="' + rd + '" fill="#e8f3fb" stroke="#2E7FC4" stroke-width="2.5" rx="6"/>';
+        if (boxing) {
+          body += '<rect x="' + (x + 6) + '" y="' + (y + 6) + '" width="' + Math.max(0, rw - 12) + '" height="' + Math.max(0, rd - 12) + '" fill="none" stroke="#6BB0E8" stroke-width="1" stroke-dasharray="4 3" rx="4"/>';
+        }
+        if (welt) {
+          body += '<rect x="' + (x + 2) + '" y="' + (y + 2) + '" width="' + Math.max(0, rw - 4) + '" height="' + Math.max(0, rd - 4) + '" fill="none" stroke="#3B8FD4" stroke-width="1.25" rx="5"/>';
+        }
+        if (ties) {
+          const ty = y + rd / 2;
+          [[x - 14, ty], [x + rw + 14, ty]].forEach(([tx, tty]) => {
+            body += '<line x1="' + tx + '" y1="' + (tty - 10) + '" x2="' + tx + '" y2="' + (tty + 10) + '" stroke="#2E7FC4" stroke-width="2"/>';
+            body += '<circle cx="' + tx + '" cy="' + tty + '" r="3" fill="#2E7FC4"/>';
+          });
+        }
+        // width dim (top)
+        const dimY = y - 16;
+        body += '<line x1="' + x + '" y1="' + dimY + '" x2="' + (x + rw) + '" y2="' + dimY + '" stroke="#0b2545" stroke-width="1"/>';
+        body += '<line x1="' + x + '" y1="' + (dimY - 5) + '" x2="' + x + '" y2="' + (dimY + 5) + '" stroke="#0b2545" stroke-width="1"/>';
+        body += '<line x1="' + (x + rw) + '" y1="' + (dimY - 5) + '" x2="' + (x + rw) + '" y2="' + (dimY + 5) + '" stroke="#0b2545" stroke-width="1"/>';
+        body += '<text x="' + (x + rw / 2) + '" y="' + (dimY - 6) + '" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#0b2545" font-weight="600">' + escSvg(fmtIn(p.w)) + ' W</text>';
+        // depth dim (right)
+        const dimX = x + rw + 18;
+        body += '<line x1="' + dimX + '" y1="' + y + '" x2="' + dimX + '" y2="' + (y + rd) + '" stroke="#0b2545" stroke-width="1"/>';
+        body += '<line x1="' + (dimX - 5) + '" y1="' + y + '" x2="' + (dimX + 5) + '" y2="' + y + '" stroke="#0b2545" stroke-width="1"/>';
+        body += '<line x1="' + (dimX - 5) + '" y1="' + (y + rd) + '" x2="' + (dimX + 5) + '" y2="' + (y + rd) + '" stroke="#0b2545" stroke-width="1"/>';
+        body += '<text x="' + (dimX + 10) + '" y="' + (y + rd / 2) + '" font-family="system-ui,sans-serif" font-size="12" fill="#0b2545" font-weight="600" dominant-baseline="middle">' + escSvg(fmtIn(p.d)) + ' D</text>';
+        // thickness callout
+        body += '<text x="' + (x + rw / 2) + '" y="' + (y + rd / 2 - 6) + '" text-anchor="middle" font-family="Georgia,serif" font-size="13" fill="#2E7FC4" font-weight="700">' + escSvg(p.label) + '</text>';
+        body += '<text x="' + (x + rw / 2) + '" y="' + (y + rd / 2 + 12) + '" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#0b2545">T = ' + escSvg(fmtIn(p.t)) + '</text>';
+      });
+
+      const frameLabel = frame === 'deep seat 2pc' ? 'Deep seat (2pc)' : frame;
+      let footerY = H - 58;
+      body += '<text x="18" y="' + footerY + '" font-family="system-ui,sans-serif" font-size="12" fill="#0b2545"><tspan font-weight="700">Frame:</tspan> ' + escSvg(frameLabel) + ' · Top view (plan) · Finish cues: ' + escSvg(finish) + '</text>';
+      footerY += 16;
+      if (brandNote) {
+        body += '<text x="18" y="' + footerY + '" font-family="system-ui,sans-serif" font-size="11" fill="#2E7FC4">Fitment ID note (trademark of owner): ' + escSvg(brandNote) + '</text>';
+        footerY += 15;
+      }
+      body += '<text x="18" y="' + (H - 12) + '" font-family="system-ui,sans-serif" font-size="10" fill="#8a6a1a">Custom quote — not an OEM drop-in SKU; dims user-entered; trademarks fitment ID only.</text>';
+
+      return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="Custom cushion plan drawing">' + body + '</svg>';
+    }
+
+    function renderCustom() {
+      const host = $('customSvgHost');
+      if (!host) return;
+      host.innerHTML = buildCustomSvg();
+    }
+    window.__tcsRenderCustom = renderCustom;
+
+    function syncTwoPc() {
+      const is2 = $('cmFrame').value === 'deep seat 2pc';
+      $('twoPcFields').hidden = !is2;
+      $('onePcFields').hidden = is2;
+      renderCustom();
+    }
+
+    ['cmFrame','cmW','cmD','cmT','cmSeatW','cmSeatD','cmSeatT','cmBackW','cmBackD','cmBackT','cmBrandNote','cmTies','cmWelt','cmBoxing']
+      .forEach(id => {
+        const el = $(id);
+        if (!el) return;
+        const ev = (el.tagName === 'SELECT' || el.type === 'checkbox') ? 'change' : 'input';
+        el.addEventListener(ev, () => {
+          if (id === 'cmFrame') syncTwoPc();
+          else renderCustom();
+        });
+      });
+
+    $('cmDownloadSvg').addEventListener('click', () => {
+      const svg = buildCustomSvg();
+      const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tcs-custom-cushion-drawing.svg';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+    $('cmPrint').addEventListener('click', () => {
+      renderCustom();
+      document.body.classList.add('print-custom-drawing');
+      const cleanup = () => document.body.classList.remove('print-custom-drawing');
+      window.addEventListener('afterprint', cleanup, { once: true });
+      setTimeout(() => { window.print(); }, 50);
+    });
+    syncTwoPc();
+
+    // Expose masterData for debugging / continuity with pasted configurator
+    window.masterData = masterData;
+
+    renderBrands();
+    renderFabrics();
+    showStep(1);
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const brandParam = params.get('brand');
+      if (brandParam && brands.indexOf(brandParam) !== -1) {
+        brandEl.value = brandParam;
+        selectTab('catalog');
+      }
+      if (params.get('frozen') === '1') {
+        qEl.value = 'TCS-C-31D';
+        selectTab('catalog');
+      }
+      const tabParam = params.get('tab');
+      if (tabParam === 'custom') selectTab('custom');
+      else if (tabParam === 'catalog') selectTab('catalog');
+      const oemParam = params.get('oem') || params.get('q');
+      if (oemParam && oemQ) {
+        selectTab('builder');
+        oemQ.value = oemParam;
+        renderOemHits();
+      }
+    } catch (e) {}
+    applyCatalog();
+  })();
+  </script>
+</body>
+</html>

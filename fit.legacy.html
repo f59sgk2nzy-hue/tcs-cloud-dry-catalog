@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OEM Fit Tool — The Cushion Store Cloud Dry</title>
+  <meta name="description" content="Interactive OEM drop-in fit tool for 94 The Cushion Store Cloud Dry SKUs. Search by brand, type, OEM code, or model.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#results">Skip to results</a>
+  <header class="site-nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">TCS</span>
+        <span class="brand-name">
+          <strong>The Cushion Store</strong>
+          <span>Cloud Dry</span>
+        </span>
+      </a>
+      <nav aria-label="Primary">
+        <ul class="nav-links">
+          <li><a href="index.html">Technical Story</a></li>
+          <li><a href="fit.html" aria-current="page">OEM Fit Tool</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="specify" role="note">
+    <div class="wrap">
+      <ol>
+        <li>Model</li>
+        <li>OEM line</li>
+        <li>Exact dimensions</li>
+        <li>Cloud Dry core / ILD</li>
+        <li>COM yield 54"</li>
+      </ol>
+    </div>
+  </div>
+
+  <main>
+    <header class="page-intro wrap">
+      <p class="eyebrow">OEM replacement master</p>
+      <h1>Fit Tool</h1>
+      <p class="lede">Ninety-four drop-in SKUs for commercial, hospitality, OEM outdoor living, and marine programs. Dimensions and COM are customer-brief authoritative. Specify the Model, then confirm OEM line, size, Cloud Dry core / ILD, and 54" COM yield.</p>
+    </header>
+
+    <form class="filters wrap" id="filters" role="search">
+      <label class="field" for="q">Search
+        <input type="search" id="q" name="q" placeholder="OEM code, model, or name" autocomplete="off" enterkeyhint="search">
+      </label>
+      <label class="field" for="brand">Brand
+        <select id="brand" name="brand">
+          <option value="">All brands</option>
+        </select>
+      </label>
+      <label class="field" for="type">Type
+        <select id="type" name="type">
+          <option value="">All types</option>
+        </select>
+      </label>
+      <button class="btn btn-ghost" type="reset" id="reset" style="color: var(--navy-mid); border-color: var(--line-strong); background: transparent;">Clear</button>
+    </form>
+
+    <div class="wrap results-meta">
+      <p id="count" aria-live="polite"></p>
+      <p><a href="index.html">Technical Story</a></p>
+    </div>
+
+    <section class="wrap sku-grid" id="results" aria-label="Matching SKUs"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <strong>The Cushion Store</strong> — Milwaukee, WI.
+      <small>ILD and ASTM values are engineered targets pending laboratory confirmation. Named furniture brands are trademarks of their respective owners; references are for fitment identification only. <a href="sources.html">Performance basis</a>.</small>
+    </div>
+  </footer>
+
+  <script src="fit-data.js"></script>
+  <script>
+    (function () {
+      var TYPES = ["dining", "deep seat", "chaise", "ottoman", "pillow", "bench", "specialty"];
+      var skus = Array.isArray(window.TCS_SKUS) ? window.TCS_SKUS : [];
+      var qEl = document.getElementById("q");
+      var brandEl = document.getElementById("brand");
+      var typeEl = document.getElementById("type");
+      var resetEl = document.getElementById("reset");
+      var resultsEl = document.getElementById("results");
+      var countEl = document.getElementById("count");
+
+      var brands = [];
+      skus.forEach(function (row) {
+        if (brands.indexOf(row.brand) === -1) brands.push(row.brand);
+      });
+      brands.sort();
+      brands.forEach(function (brand) {
+        var opt = document.createElement("option");
+        opt.value = brand;
+        opt.textContent = brand;
+        brandEl.appendChild(opt);
+      });
+      TYPES.forEach(function (type) {
+        var opt = document.createElement("option");
+        opt.value = type;
+        opt.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+        typeEl.appendChild(opt);
+      });
+
+      function haystack(row) {
+        return [
+          row.modelSku,
+          row.replaces,
+          row.config,
+          row.dimensions,
+          row.coreSpec,
+          row.com,
+          row.brand,
+          row.type
+        ].join(" ").toLowerCase();
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function card(row) {
+        return (
+          '<article class="sku-card" id="' + escapeHtml(row.modelSku) + '">' +
+            '<div class="sku-top">' +
+              '<div class="sku-id">' + escapeHtml(row.modelSku) + "</div>" +
+              '<div class="chips">' +
+                '<span class="chip">' + escapeHtml(row.brand) + "</span>" +
+                '<span class="chip chip-type">' + escapeHtml(row.type) + "</span>" +
+              "</div>" +
+            "</div>" +
+            '<div class="sku-name">' + escapeHtml(row.replaces) + "</div>" +
+            '<div class="sku-meta">' +
+              "<div><span>Configuration</span>" + escapeHtml(row.config) + "</div>" +
+              "<div><span>Exact dimensions</span>" + escapeHtml(row.dimensions) + "</div>" +
+              "<div><span>Core / ILD</span>" + escapeHtml(row.coreSpec) + "</div>" +
+              "<div><span>COM 54\"</span>" + escapeHtml(row.com) + "</div>" +
+            "</div>" +
+          "</article>"
+        );
+      }
+
+      function apply() {
+        var query = (qEl.value || "").trim().toLowerCase();
+        var brand = brandEl.value;
+        var type = typeEl.value;
+        var matches = skus.filter(function (row) {
+          if (brand && row.brand !== brand) return false;
+          if (type && row.type !== type) return false;
+          if (query && haystack(row).indexOf(query) === -1) return false;
+          return true;
+        });
+
+        if (!matches.length) {
+          countEl.innerHTML = "<strong>0</strong> of " + skus.length + " SKUs";
+          resultsEl.innerHTML =
+            '<div class="empty">' +
+              "<h2>No SKUs match</h2>" +
+              "<p>Try another OEM code, model, or brand — or " +
+              '<button class="text-btn" type="button" id="empty-clear">clear filters</button>.</p>' +
+            "</div>";
+          var emptyClear = document.getElementById("empty-clear");
+          if (emptyClear) emptyClear.addEventListener("click", clearAll);
+          return;
+        }
+
+        countEl.innerHTML = "<strong>" + matches.length + "</strong> of " + skus.length + " SKUs";
+        resultsEl.innerHTML = matches.map(card).join("");
+      }
+
+      function clearAll() {
+        qEl.value = "";
+        brandEl.value = "";
+        typeEl.value = "";
+        apply();
+        qEl.focus();
+      }
+
+      qEl.addEventListener("input", apply);
+      brandEl.addEventListener("change", apply);
+      typeEl.addEventListener("change", apply);
+      resetEl.addEventListener("click", function (event) {
+        event.preventDefault();
+        clearAll();
+      });
+
+      apply();
+    })();
+  </script>
+</body>
+</html>
